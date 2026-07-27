@@ -9,15 +9,15 @@ extends Node2D
 var controller: RefCounted
 var visual_config: Dictionary = {}
 
-func setup(p_controller: RefCounted, p_visual_config: Dictionary, job_folder: String = "", phases: Array = []):
+func setup(p_controller: RefCounted, p_visual_config: Dictionary, job_folder: String = "", phases: Array = [], quiz_config: Dictionary = {}):
 	controller = p_controller
 	visual_config = p_visual_config
 
 	arena_view.setup(controller.state.arena, visual_config)
 	arena_view.set_ball_reference(ball_view)
 	ball_view.is_time_synced_externally = true
-	ball_view.setup(controller.state.ball, visual_config, job_folder, phases)
-	trail_renderer.setup(controller, ball_view, visual_config)
+	ball_view.setup(controller.state.ball, visual_config, job_folder, phases, quiz_config)
+	trail_renderer.setup(controller, ball_view, visual_config, phases)
 
 func _process(delta: float):
 	if controller and ball_view:

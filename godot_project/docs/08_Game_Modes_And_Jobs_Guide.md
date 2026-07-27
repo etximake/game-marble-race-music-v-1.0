@@ -8,18 +8,17 @@ Tài liệu này hướng dẫn cách kết nối của các Game Mode với Cor
 
 Để tối ưu khả năng tái sử dụng và tránh trùng lặp mã cấu hình, hệ thống tách biệt cấu hình thành 2 file độc lập trước khi import vào `Main.gd`:
 
-1. **Job Song Data (`video_config.json`)**: Nằm trong thư mục từng Job (`generated/jobs/job_001/`). Chỉ chứa dữ liệu bài hát (`audio.notes`, `video.duration`, `video.output_name`, `text` overlays).
-2. **Gameplay Template (`gameplay_template.json`)**: Nằm tại `shared/gameplay_template.json` (hoặc chỉ định qua CLI `--template`). Chứa quy tắc chơi (`game_mode`), thông số vật lý (`gameplay.ball`, `gameplay.arena`), giao diện (`visual`), độ phân giải (`video.width`, `video.height`, `fps`) và timeline giai đoạn (`phases`).
+1. **Job Song Data (`video_config.json`)**: Nằm trong thư mục từng Job. Chứa dữ liệu bài hát (`audio.notes`, `video.duration`, `video.output_name`, `text` overlays, job assets).
+2. **Gameplay Snapshot (`gameplay_config.json`)**: Nằm cạnh Job Song Data. Python tạo snapshot này từ `shared/gameplay_template.json` hoặc preset polygon. Chứa mode, gameplay, visual, quiz, timeline, resolution và phases.
 
 ```text
- [Job Song Data (video_config.json)]        [Gameplay Template (gameplay_template.json)]
+  [Job Song Data (video_config.json)]        [Gameplay Snapshot (gameplay_config.json)]
  (Duration, Audio Notes, Text)              (Game Mode, Ball/Arena, Visual, Phases)
                    │                                             │
                    └──────────────────────┬──────────────────────┘
                                           ▼
                                  [ConfigLoader.gd]
-                                (Deep Merge & Scale
-                              phases[-1].end_time = duration)
+                               (Deep Merge & Runtime Timeline)
                                           │
                                           ▼
                                   [VideoConfig (Merged)]
@@ -38,8 +37,8 @@ Tài liệu này hướng dẫn cách kết nối của các Game Mode với Cor
 ```
 
 Tại runtime, `ConfigLoader.gd` thực hiện:
-- **Deep Merge**: Trộn dữ liệu bài hát của Job đè lên bản sao của Gameplay Template.
-- **Tự động giãn tỷ lệ thời gian**: Tự động cập nhật `end_time` của phase cuối cùng (`final_storm`) bằng đúng `video.duration` của bài hát, giúp quá trình tiến hóa hình học (bóp góc đa giác) luôn dồn dập và kết thúc đúng thời lượng bài hát.
+- **Deep Merge**: Trộn Job Song Data với Gameplay Snapshot của chính job.
+- **Runtime Timeline**: Tính phase từ `timeline` snapshot và `video.duration`, đồng thời tính quiz reveal theo `reveal_ratio`.
 
 ---
 
@@ -80,7 +79,7 @@ Tạo thư mục `scenes/modes/<mode_name>/` và `scripts/presentation/modes/<mo
   ```
 
 ### Bước 4: Đăng ký Mode mới vào Factory
-Mặc dù hệ thống chỉ chạy duy nhất một chế độ chơi tại một thời điểm (được quyết định bởi trường `"game_mode"` trong `gameplay_template.json`), bạn vẫn cần đăng ký tất cả các chế độ chơi mà dự án hỗ trợ vào Factory để hệ thống có thể phân giải và tải động chính xác chế độ chơi được yêu cầu.
+Mặc dù hệ thống chỉ chạy duy nhất một chế độ chơi tại một thời điểm (được quyết định bởi trường `"game_mode"` trong `gameplay_config.json`), bạn vẫn cần đăng ký tất cả các chế độ chơi mà dự án hỗ trợ vào Factory để hệ thống có thể phân giải và tải động chính xác chế độ chơi được yêu cầu.
 
 Các bước thực hiện đăng ký:
 1. Mở `scripts/application/GameModeRegistry.gd`, thêm tên mode vào mảng hỗ trợ:
@@ -114,13 +113,12 @@ Các bước thực hiện đăng ký:
 
 ## 3. Cách chỉ định chạy 1 Game Mode hoặc Thay đổi Quy tắc Gameplay
 
-Game mode và các thông số vật lý (tốc độ bóng, bán kính tối đa, kiểu hiệu ứng visual, danh sách phases) được cấu hình tập trung trong `shared/gameplay_template.json`.
+Game mode và các thông số vật lý (tốc độ bóng, bán kính tối đa, kiểu hiệu ứng visual, quiz và phases) được snapshot vào `generated/jobs/<job_id>/gameplay_config.json`. `shared/gameplay_template*.json` chỉ là preset đầu vào cho Python.
 
 ### Cách thay đổi Game Mode hoặc Thông số Hệ thống:
 
 1. **Thay đổi Game Mode:**
-   Mở tệp `shared/gameplay_template.json`, tại khóa `"game_mode"`, thay đổi tên chế độ chơi mong muốn (ví dụ: `"circle_bounce"` hoặc `"polygon_bounce"`).
-   - Với `polygon_bounce`, dùng template riêng `shared/gameplay_template_polygon.json` chứa sẵn `game_mode: "polygon_bounce"` và `arena.sides: 4`.
+    Chọn preset gameplay khi tạo job trong profile Python. Với `polygon_bounce`, đặt `gameplay_template_path` tới `shared/gameplay_template_polygon.json`.
    - Arena type: `"square"` (4 cạnh), `"pentagon"` (5 cạnh), `"hexagon"` (6 cạnh).
 
 2. **Thay đổi Cấu hình Vật lý / Visual:**
@@ -160,28 +158,23 @@ Game mode và các thông số vật lý (tốc độ bóng, bán kính tối đ
 
 ## 4. Cách chạy hoặc thay đổi sang một Job mới
 
-Job là một thư mục nằm trong `generated/jobs/` chứa tệp dữ liệu bài hát (`video_config.json`) và các file âm thanh (`note_clips/*.wav`).
+Job là một thư mục nằm trong `generated/jobs/` chứa cặp JSON (`video_config.json`, `gameplay_config.json`) và các file âm thanh (`note_clips/*.wav`).
 
-Mặc định, nếu chạy trực tiếp từ Editor, Godot sẽ nạp dữ liệu bài hát từ `res://generated/jobs/job_001/video_config.json` và gộp với template `res://shared/gameplay_template.json`.
+Mặc định, nếu chạy trực tiếp từ Editor, Godot sẽ nạp cặp JSON từ `res://generated/jobs/job_001/`.
 
-Để thay đổi sang một Job hoặc Template khác:
+Để thay đổi sang một Job khác:
 
 ### Cách 1: Thay đổi bằng Command Line (Khuyên dùng khi render tự động hàng loạt)
-Khởi chạy Godot console kèm theo các cờ `--config`, `--template` và `--job_dir`:
+Khởi chạy Godot console với file Job Music JSON. Gameplay snapshot được tự động tìm cạnh file này:
 ```powershell
-& "Godot_v4.5-stable_win64_console.exe" --headless --path "D:\game-marble-race-music-v-1.0" --config "res://generated/jobs/job_002/video_config.json" --template "res://shared/gameplay_template.json" --job_dir "res://generated/jobs/job_002/"
+& "Godot_v4.5-stable_win64_console.exe" --headless --path "D:\game-marble-race-music-v-1.0" -- --config "res://generated/jobs/job_002/video_config.json"
 ```
-*Hệ thống trong `Main.gd` (`_parse_arguments()`) sẽ tự động bắt các tham số này để nạp dữ liệu bài hát từ `--config`, nạp quy tắc chơi từ `--template`, và nạp âm thanh từ `--job_dir`.*
-
-Để chạy `polygon_bounce` mode, chỉ định template polygon:
-```powershell
-& "Godot_v4.5-stable_win64_console.exe" --headless --path "D:\game-marble-race-music-v-1.0" --config "res://generated/jobs/job_002/video_config.json" --template "res://shared/gameplay_template_polygon.json" --job_dir "res://generated/jobs/job_002/"
-```
+*Hệ thống trong `Main.gd` tự động suy ra Job folder từ `--config` và `ConfigLoader.gd` đọc `gameplay_config.json` cạnh file đó.*
 
 ### Cách 2: Thay đổi trực tiếp trong code Main.gd (Khi cần debug nhanh trên Editor)
 Mở `scripts/presentation/Main.gd` và cập nhật trực tiếp biến mặc định ở các dòng 9-11:
 ```gdscript
 var config_path: String = "res://generated/jobs/job_002/video_config.json"
-var template_path: String = "res://shared/gameplay_template.json"
-var job_folder: String = "res://generated/jobs/job_002/"
+var template_path: String = ""
+var job_folder: String = ""
 ```

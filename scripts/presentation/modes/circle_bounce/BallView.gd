@@ -21,7 +21,7 @@ var reveal_time: float = -1.0
 var phases_list: Array = []
 var is_time_synced_externally: bool = false
 
-func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "", phases: Array = []):
+func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "", phases: Array = [], quiz_config: Dictionary = {}):
 	state = p_state
 	color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
 	use_glow = visual_config.get("use_glow", true)
@@ -34,9 +34,11 @@ func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "
 	icon_rotation_mode = visual_config.get("icon_rotation_mode", "none")
 	
 	phases_list = phases
-	reveal_time = -1.0
+	reveal_time = float(quiz_config.get("reveal_time", -1.0))
+	if not bool(quiz_config.get("enabled", true)):
+		reveal_time = 0.0
 	for phase in phases:
-		if phase.get("name", "") == icon_reveal_phase:
+		if reveal_time < 0.0 and phase.get("name", "") == icon_reveal_phase:
 			reveal_time = float(phase.get("start_time", 0.0))
 			break
 			
@@ -92,12 +94,11 @@ func _draw():
 
 		if not should_reveal:
 			if icon_silhouette_mode:
-				if ball_icon_texture:
-					var size = (radius - 2.5) * 2.0
-					var dest_rect = Rect2(-radius + 2.5, -radius + 2.5, size, size)
-					draw_texture_rect(ball_icon_texture, dest_rect, false, Color(0.0, 0.0, 0.0, 1.0))
-				else:
-					_draw_question_placeholder(radius, Color(0.0, 0.0, 0.0, 1.0))
+				# Never draw the real logo before reveal. The quiz silhouette is abstract.
+				var silhouette_color = color.darkened(0.55)
+				draw_circle(Vector2.ZERO, radius - 2.5, silhouette_color)
+				draw_arc(Vector2.ZERO, radius - 2.5, 0.0, TAU, 96, color.lightened(0.25), 3.0, true)
+				_draw_quiz_question(radius)
 			else:
 				_draw_question_placeholder(radius, Color.WHITE)
 		else:
@@ -130,8 +131,8 @@ func _draw():
 			var hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)
 			draw_col = Color.from_hsv(hue, 0.85, 0.9)
 
-		# Solid green body base
-		var ball_base_col = Color(0.0, 0.75, 0.1) # Vibrant Green as reference image
+		# Keep the configured color as the visual source of truth.
+		var ball_base_col = draw_col
 		draw_circle(Vector2.ZERO, radius - 2.5, ball_base_col)
 		
 		# Radial gradient layers fading into bright center
@@ -142,8 +143,8 @@ func _draw():
 			draw_circle(Vector2.ZERO, r_level, Color(0.1, 0.9, 0.2, c_alpha))
 
 		# Soft center inner glow ring
-		draw_circle(Vector2.ZERO, radius * 0.52, Color(0.65, 0.98, 0.55, 0.75))
-		draw_circle(Vector2.ZERO, radius * 0.36, Color(0.85, 1.0, 0.78, 0.90))
+		draw_circle(Vector2.ZERO, radius * 0.52, Color(1.0, 1.0, 1.0, 0.32))
+		draw_circle(Vector2.ZERO, radius * 0.36, Color(1.0, 1.0, 1.0, 0.46))
 		# White highlight center
 		draw_circle(Vector2.ZERO, radius * 0.22, Color(1.0, 1.0, 1.0, 0.98))
 
@@ -168,3 +169,14 @@ func _draw_question_placeholder(radius: float, modulate_color: Color) -> void:
 			var descent = font.get_descent(font_size)
 			var pos = Vector2(-radius, (ascent - descent) * 0.5 - radius * 0.05)
 			draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, question_color)
+
+func _draw_quiz_question(radius: float) -> void:
+	var font = load("res://assets/fonts/Montserrat-ExtraBold.ttf") as Font
+	if not font:
+		font = ThemeDB.fallback_font
+	if font:
+		var font_size = int(radius * 0.72)
+		var ascent = font.get_ascent(font_size)
+		var descent = font.get_descent(font_size)
+		var pos = Vector2(-radius, (ascent - descent) * 0.5 - radius * 0.05)
+		draw_string(font, pos, "?", HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)

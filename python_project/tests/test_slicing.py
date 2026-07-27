@@ -48,3 +48,12 @@ def test_invalid_manual_markers_negative():
     )
     with pytest.raises(InvalidSlicePlanError):
         plan.validate()
+
+def test_target_duration_must_fit_short_profile():
+    plan = SlicePlan(mode=SliceMode.FIXED_INTERVAL, fixed_interval_seconds=0.2, target_duration_seconds=22.0)
+    plan.validate()
+
+def test_target_duration_cannot_exceed_short_profile():
+    plan = SlicePlan(mode=SliceMode.FIXED_INTERVAL, fixed_interval_seconds=0.2, target_duration_seconds=31.0)
+    with pytest.raises(InvalidSlicePlanError):
+        plan.validate()

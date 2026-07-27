@@ -19,7 +19,6 @@ Checklist nay bien cac tai lieu thiet ke thanh thu tu implement cu the, giu dung
 
 - Chot path convention cho `note_clips_dir`.
 - Cap nhat `JSON_CONTRACT.md` theo convention do.
-- Cap nhat `example_video_config.json` neu doi path relative theo job folder.
 - Sieu chat `video_config.schema.json` voi color pattern va `audio_delay_ms >= 0`.
 - Tao semantic validation rules trong Python sau khi co code.
 

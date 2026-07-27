@@ -36,7 +36,6 @@ Schema hien tai nen dam bao common fields:
 
 - Co day du field bat buoc.
 - Field dung type.
-- `project_version` la string.
 - `game_mode` nam trong danh sach mode duoc ho tro.
 - `video.width`, `video.height`, `video.fps` lon hon 0.
 - `video.duration` lon hon 0.
@@ -64,10 +63,9 @@ Semantic validation kiem tra cac rule lien quan nhieu field hoac lien quan file 
 
 ## Common semantic rules
 
-### Version and mode rules
+### Mode rules
 
 ```text
-project_version must be supported by Python generator and Godot loader.
 game_mode must have a registered mode validator and mode controller.
 gameplay must be validated by the active mode validator.
 ```
@@ -293,7 +291,6 @@ Godot nen validate lai nhung loi critical luc load:
 config file exists
 JSON parse success
 required fields exist
-project_version supported
 game_mode supported
 fps > 0
 duration > 0
@@ -313,7 +310,6 @@ Dung pipeline/render.
 
 ```text
 missing required field
-unsupported project_version
 unsupported game_mode
 invalid JSON
 duration <= 0
@@ -412,25 +408,10 @@ resolved path:
   generated/jobs/job_001/note_clips/note_0001.wav
 ```
 
-## Compatibility rule
-
-`project_version` nen duoc dung de quan ly thay doi contract.
-
-MVP:
-
-```text
-project_version = "1.0"
-```
-
-Godot nen fail hoac warning neu gap major version khong ho tro.
-
-Python nen ghi dung version contract hien tai.
-
 ## Definition of done
 
 Validation system duoc xem la dat MVP khi:
 
-- `example_video_config.json` pass schema validation.
 - Python generated config pass schema validation.
 - Python generated config pass common va `circle_bounce` semantic validation.
 - Validator bao loi ro field path khi config sai.

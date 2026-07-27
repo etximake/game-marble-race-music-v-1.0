@@ -26,11 +26,16 @@ class PydubAudioService:
         except Exception as e:
             raise AudioMetadataReadError(f"Failed to read audio metadata for '{path}': {e}")
 
-    def convert_to_wav(self, input_path: str, output_path: str) -> None:
+    def convert_to_wav(self, input_path: str, output_path: str, target_duration_seconds: float = None) -> None:
         if not os.path.exists(input_path):
             raise FileNotFoundError(f"Input audio file not found at: {input_path}")
         try:
             audio = AudioSegment.from_file(input_path)
+            if target_duration_seconds is not None:
+                target_ms = int(target_duration_seconds * 1000)
+                if target_ms <= 0:
+                    raise AudioConversionError("Target audio duration must be positive")
+                audio = audio[:target_ms]
             # Export as mono wav at 44100 Hz
             audio = audio.set_frame_rate(44100).set_channels(1)
             audio.export(output_path, format="wav")

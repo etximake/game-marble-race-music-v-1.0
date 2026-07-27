@@ -7,17 +7,17 @@
 
 ## Scope Boundary
 
-- Godot là môi trường mô phỏng/render runtime: load và gộp 2 file cấu hình (Job Data & Gameplay Template), khởi tạo các scene objects, chạy chế độ chơi hiện hành, phát các note nhạc thông qua note_triggered, và thực hiện render đầu ra.
+- Godot là môi trường mô phỏng/render runtime: load và gộp 2 file cấu hình trong từng job (Job Data & Gameplay Snapshot), khởi tạo các scene objects, chạy chế độ chơi hiện hành, phát các note nhạc thông qua note_triggered, và thực hiện render đầu ra.
 - Không thêm phần phân tích âm thanh, sinh note clip hay sinh `video_config.json` trực tiếp tại đây.
 - Các tài liệu `shared/JSON_CONTRACT.md`, `shared/video_config.schema.json`, và `shared/VALIDATION_RULES.md` vẫn là nguồn chân lý cho hợp đồng cấu hình.
 
 ## Architecture To Preserve
 
 - Tuân thủ mô hình Clean Architecture (`presentation -> application -> domain`).
-- **Cấu hình 2 Thành phần (Job Data & Gameplay Template)**:
+- **Cấu hình 2 Thành phần trong Job (Job Data & Gameplay Snapshot)**:
   - Dữ liệu bài hát nằm trong `video_config.json` ở job folder (chỉ chứa notes, duration, output_name, text overlays).
-  - Quy tắc chơi nằm trong `shared/gameplay_template.json` (chứa game_mode, visual, ball/arena settings, phases).
-  - `ConfigLoader.gd` nạp song song, thực hiện Deep Merge và tự động scale `phases[-1].end_time` khớp với `duration` bài hát.
+  - Quy tắc chơi nằm trong `gameplay_config.json` của job (snapshot từ shared preset, chứa game_mode, visual, ball/arena settings, quiz, timeline, phases).
+  - `ConfigLoader.gd` nạp song song hai JSON cùng job, thực hiện Deep Merge và tính timeline khớp với `duration` bài hát.
 - Giữ domain logic độc lập với các node engine (không kế thừa Node/SceneTree).
 - Giữ `Main.gd` mỏng nhẹ, chỉ chịu trách nhiệm nạp cấu hình và kết nối tín hiệu.
 

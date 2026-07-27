@@ -16,6 +16,7 @@ class SlicePlan:
     max_note_count: int = 400
     fade_in_ms: int = 3
     fade_out_ms: int = 3
+    target_duration_seconds: Optional[float] = None
 
     def validate(self) -> None:
         if self.mode == SliceMode.FIXED_INTERVAL:
@@ -35,3 +36,5 @@ class SlicePlan:
             raise InvalidSlicePlanError("max_note_count must be greater than 0")
         if self.fade_in_ms < 0 or self.fade_out_ms < 0:
             raise InvalidSlicePlanError("fade in/out times must be non-negative")
+        if self.target_duration_seconds is not None and not (1.0 <= self.target_duration_seconds <= 30.0):
+            raise InvalidSlicePlanError("target_duration_seconds must be between 1 and 30 seconds")

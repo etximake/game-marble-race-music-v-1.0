@@ -11,10 +11,15 @@ class FileSystemJobRepository:
         self.base_jobs_dir = base_jobs_dir
 
     def create_job(self, job_id: str) -> Job:
+        if not job_id or job_id in {".", ".."} or os.path.basename(job_id) != job_id:
+            raise JobWriteError(f"Invalid job id: {job_id}")
         job_dir = os.path.join(self.base_jobs_dir, job_id)
         note_clips_dir = os.path.join(job_dir, "note_clips")
         
         try:
+            # Regeneration must not leave clips from an older, longer source job.
+            if os.path.isdir(job_dir):
+                shutil.rmtree(job_dir)
             os.makedirs(job_dir, exist_ok=True)
             os.makedirs(note_clips_dir, exist_ok=True)
         except Exception as e:
@@ -26,6 +31,7 @@ class FileSystemJobRepository:
             source_audio_path=os.path.join(job_dir, "source_audio.wav"),
             metadata_path=os.path.join(job_dir, "metadata.json"),
             video_config_path=os.path.join(job_dir, "video_config.json"),
+            gameplay_config_path=os.path.join(job_dir, "gameplay_config.json"),
             note_clips_dir=note_clips_dir
         )
 
@@ -48,3 +54,10 @@ class FileSystemJobRepository:
                 json.dump(config.to_dict(), f, indent=2)
         except Exception as e:
             raise JobWriteError(f"Failed to save video config to {job.video_config_path}: {e}")
+
+    def save_gameplay_config(self, job: Job, gameplay_config: Dict[str, Any]) -> None:
+        try:
+            with open(job.gameplay_config_path, "w", encoding="utf-8") as f:
+                json.dump(gameplay_config, f, indent=2)
+        except Exception as e:
+            raise JobWriteError(f"Failed to save gameplay config to {job.gameplay_config_path}: {e}")

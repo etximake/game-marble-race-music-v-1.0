@@ -2,7 +2,7 @@
 
 ## Muc tieu
 
-Doc ca `video_config.json` (chua du lieu bai hat: note list, duration, output name) va `gameplay_template.json` (chua cau hinh gameplay, visual, phases cua he thong) va gop chung (merge) lai tai runtime. Loader khong chon game mode truc tiep; application layer dung `VideoConfig.get_game_mode()` de chon mode.
+Doc `video_config.json` va `gameplay_config.json` trong cung mot job folder va gop chung (merge) lai tai runtime. `gameplay_config.json` la snapshot do Python tao tu gameplay template. Loader khong chon game mode truc tiep; application layer dung `VideoConfig.get_game_mode()` de chon mode.
 
 ## Module de xuat
 
@@ -17,9 +17,9 @@ PathResolver.gd
 Trach nhiem:
 
 - Doc va parse file JSON data bai hat (`video_config.json` từ job folder).
-- Doc va parse file JSON template chung (`gameplay_template.json` tu shared/ hoac duong dan duoc chi dinh).
+- Doc va parse file gameplay snapshot (`gameplay_config.json` nam canh job config).
 - Gop de (Deep Merge) du lieu job vao ban sao cua template.
-- Tu dong gian ty le: gán `end_time` cua phase cuoi cung (`final_storm`) bang dung thoi luong `duration` cua bai hat.
+- Tinh phase timeline tu snapshot policy va duration cua job.
 - Kiem tra field bat buoc tren merged config.
 - Tra ve VideoConfig object/dictionary da duoc gop.
 
@@ -29,7 +29,6 @@ Trach nhiem:
 
 - Luu config merged.
 - Cung cap helper function:
-  - get_project_version()
   - get_game_mode()
   - get_video_width()
   - get_duration()
@@ -58,13 +57,13 @@ full path: generated/jobs/job_001/note_clips/note_0001.wav
 Neu thieu file JSON:
 
 ```text
-Show error: Cannot find video_config.json / gameplay_template.json
+Show error: Cannot find video_config.json / gameplay_config.json
 ```
 
 Neu JSON sai format:
 
 ```text
-Show error: Invalid video_config.json / gameplay_template.json
+Show error: Invalid video_config.json / gameplay_config.json
 ```
 
 Neu `game_mode` khong duoc support:

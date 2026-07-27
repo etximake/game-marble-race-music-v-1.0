@@ -39,11 +39,11 @@ def test_generate_and_validate_video_config(schema_path):
     )
 
     # Verify attributes
-    assert config.project_version == "1.0"
-    assert config.game_mode == "circle_bounce"
     assert config.video.duration == 10.0
     assert len(config.audio.notes) == 5
-    assert len(config.phases) == 3
+    assert "gameplay" not in config.to_dict()
+    assert "visual" not in config.to_dict()
+    assert "phases" not in config.to_dict()
 
     # Schema & Semantic validation
     validator.validate(config)

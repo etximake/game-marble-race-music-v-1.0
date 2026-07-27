@@ -1,0 +1,19 @@
+{
+  "job_id": "job_001",
+  "gameplay_template_path": "../shared/gameplay_template.json",
+  "input_path": "source/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3",
+  "target_duration_seconds": 22.0,
+  "slice_mode": "fixed_interval",
+  "slice_interval_seconds": 0.4,
+  "max_note_count": 400,
+  "fade_in_ms": 3,
+  "fade_out_ms": 3,
+  "text": {
+    "show_text": true,
+    "top_text": "Can you guess this logo?",
+    "bottom_text": "Stay till the end to find out!"
+  },
+  "job_assets": {
+    "ball_icon_path": "res://assets/icons/Bayern.png"
+  }
+}

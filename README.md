@@ -37,13 +37,14 @@ Godot lam:
 
 ## File trung tam
 
-File trung tam la:
+Hai file trung tam cua moi job la:
 
 ```text
 generated/jobs/job_001/video_config.json
+generated/jobs/job_001/gameplay_config.json
 ```
 
-Moi thay doi giua Python va Godot phai thong qua file nay.
+`video_config.json` chua du lieu audio/job. `gameplay_config.json` la snapshot gameplay do Python tao tu shared preset. Moi thay doi giua Python va Godot phai thong qua cap file nay.
 
 ## Tai lieu kien truc
 

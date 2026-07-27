@@ -4,17 +4,16 @@
 
 `shared` chua contract du lieu dung chung giua Python project va Godot project.
 
-Python tao `video_config.json` theo contract nay.
+Python tao `video_config.json` va snapshot `gameplay_config.json` trong moi job.
 
-Godot doc `video_config.json` theo contract nay.
+Godot doc cap hai file trong cung job folder theo contract nay.
 
 ## Tai lieu va file chinh
 
 - `JSON_CONTRACT.md`: mo ta format `video_config.json`.
 - `video_config.schema.json`: JSON Schema validate shape/type/required field.
-- `example_video_config.json`: config mau.
-- `gameplay_template.json`: template mac dinh cho `circle_bounce` mode.
-- `gameplay_template_polygon.json`: template cho `polygon_bounce` mode.
+- `gameplay_template.json`: preset dau vao cho snapshot `circle_bounce`.
+- `gameplay_template_polygon.json`: preset dau vao cho snapshot `polygon_bounce`.
 - `VALIDATION_RULES.md`: rule validate schema va semantic rules.
 
 ## Nguyen tac

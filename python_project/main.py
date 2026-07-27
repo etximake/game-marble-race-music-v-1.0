@@ -1,7 +1,7 @@
 import sys
 import os
+import json
 import argparse
-import json
 
 # Setup sys.path to resolve src
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,41 +15,36 @@ from src.infrastructure.audio.audio_slicer import PydubAudioSlicer
 from src.infrastructure.filesystem.job_repository import FileSystemJobRepository
 from src.infrastructure.validation.json_schema_validator import JsonSchemaVideoConfigValidator
 
-import sys
-import os
-import json
-
-# Setup sys.path to resolve src
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from src.domain.slicing import SlicePlan, SliceMode
-from src.domain.errors import MusicBallError
-from src.application.generate_video_config import GenerateVideoConfigUseCase
-from src.application.generate_job import GenerateJobUseCase
-from src.infrastructure.audio.audio_service import PydubAudioService
-from src.infrastructure.audio.audio_slicer import PydubAudioSlicer
-from src.infrastructure.filesystem.job_repository import FileSystemJobRepository
-from src.infrastructure.validation.json_schema_validator import JsonSchemaVideoConfigValidator
 
 def main():
-    # Parameters configured directly inside the program
-    input_path = "source/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3"
-    job_id = "job_001"
-    slice_mode_str = "fixed_interval"
-    interval = 0.4
-    markers = []
-    max_notes = 400
-    fade_in_ms = 3
-    fade_out_ms = 3
-    
-    custom_gameplay = None
-    custom_visual = None
-    custom_text = None
-
     # Initialize domain & infrastructure components
     # Resolve the path to the schema.
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    parser = argparse.ArgumentParser(description="Generate a Music Ball job from a JSON profile")
+    parser.add_argument("--profile", default="job_profile.json")
+    args = parser.parse_args()
+    profile_path = args.profile
+    if not os.path.isabs(profile_path):
+        profile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), profile_path)
+    with open(profile_path, "r", encoding="utf-8") as profile_file:
+        profile = json.load(profile_file)
+
+    input_path = profile["input_path"]
+    job_id = profile["job_id"]
+    slice_mode_str = profile["slice_mode"]
+    interval = profile.get("slice_interval_seconds")
+    markers = profile.get("markers", [])
+    max_notes = profile.get("max_note_count", 400)
+    fade_in_ms = profile.get("fade_in_ms", 3)
+    fade_out_ms = profile.get("fade_out_ms", 3)
+    target_duration_seconds = profile.get("target_duration_seconds")
+    custom_text = profile.get("text")
+    custom_job_assets = profile.get("job_assets")
+
     schema_path = os.path.join(project_root, "shared", "video_config.schema.json")
+    gameplay_template_path = profile.get("gameplay_template_path", "../shared/gameplay_template.json")
+    if not os.path.isabs(gameplay_template_path):
+        gameplay_template_path = os.path.normpath(os.path.join(os.path.dirname(profile_path), gameplay_template_path))
     base_jobs_dir = os.path.join(project_root, "generated", "jobs")
 
     audio_service = PydubAudioService()
@@ -75,6 +70,7 @@ def main():
         max_note_count=max_notes,
         fade_in_ms=fade_in_ms,
         fade_out_ms=fade_out_ms
+        ,target_duration_seconds=target_duration_seconds
     )
 
     try:
@@ -90,14 +86,15 @@ def main():
             source_audio_path=input_path,
             job_id=job_id,
             slice_plan=slice_plan,
-            custom_gameplay=custom_gameplay,
-            custom_visual=custom_visual,
-            custom_text=custom_text
+            custom_text=custom_text,
+            custom_job_assets=custom_job_assets,
+            gameplay_template_path=gameplay_template_path,
         )
 
         print(f"\nJob '{job.job_id}' generated successfully!")
         print(f"Output directory: {job.job_dir}")
         print(f"Config path: {job.video_config_path}")
+        print(f"Gameplay config path: {job.gameplay_config_path}")
         print(f"Clips directory: {job.note_clips_dir}")
         sys.exit(0)
 

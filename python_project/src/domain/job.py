@@ -7,4 +7,5 @@ class Job:
     source_audio_path: str
     metadata_path: str
     video_config_path: str
+    gameplay_config_path: str
     note_clips_dir: str

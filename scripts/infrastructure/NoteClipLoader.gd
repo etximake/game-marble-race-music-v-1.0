@@ -7,14 +7,13 @@ static func load_note_clip(path: String) -> AudioStream:
 		printerr("NoteClipNotFound: " + path)
 		return null
 	
-	# In Godot 4.x, loading external audio at runtime (WAV/MP3) requires generating a stream or using load() for imported resources.
-	# Since these are in generated/jobs and might not be imported as resources, we can load them as raw bytes.
-	if path.begins_with("res://") or path.begins_with("user://"):
-		var stream = load(path)
-		if stream is AudioStream:
-			return stream
-	
-	# Fallback/External loading
+	# Generated WAV files are not imported Godot resources. Parse them directly
+	# before attempting resource loading.
+	if not path.to_lower().ends_with(".wav") and (path.begins_with("res://") or path.begins_with("user://")):
+		var imported_stream = load(path)
+		if imported_stream is AudioStream:
+			return imported_stream
+
 	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
 		printerr("AudioLoadFailed: Cannot open file " + path)

@@ -10,13 +10,14 @@ var trail_mode: String = "web"
 var trail_persistence: float = 1.0
 var use_rainbow: bool = true
 var base_color: Color = Color.WHITE
+var phases: Array = []
 
 var stamps: Array[Dictionary] = []
 var last_recorded_pos: Vector2 = Vector2.ZERO
 var has_last_pos: bool = false
 var elapsed_time: float = 0.0
 
-func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Dictionary):
+func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Dictionary, p_phases: Array = []):
 	mode_controller = controller
 	ball_view = p_ball_view
 	visual_config = p_visual_config
@@ -25,6 +26,7 @@ func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Diction
 	trail_persistence = float(visual_config.get("trail_persistence", 1.0))
 	use_rainbow = visual_config.get("use_rainbow_trail", true)
 	base_color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
+	phases = p_phases
 
 func handle_collision(_info: CollisionInfo):
 	queue_redraw()
@@ -63,13 +65,16 @@ func _process(delta: float):
 
 		last_recorded_pos = current_pos
 
+		var trail_multiplier = 1.0
+		if not phases.is_empty() and "current_time" in mode_controller:
+			trail_multiplier = PhaseRules.get_trail_multiplier(elapsed_time, phases)
 		var max_stamps = 20000
 		if trail_mode == "short":
-			max_stamps = int(200 * trail_persistence)
+			max_stamps = int(200 * trail_persistence * trail_multiplier)
 		elif trail_mode == "long":
-			max_stamps = int(1200 * trail_persistence)
+			max_stamps = int(1200 * trail_persistence * trail_multiplier)
 		else:
-			max_stamps = int(5000 * trail_persistence)
+			max_stamps = int(5000 * trail_persistence * trail_multiplier)
 
 		if stamps.size() > max_stamps:
 			stamps = stamps.slice(stamps.size() - max_stamps)
@@ -91,6 +96,8 @@ func _draw():
 		trail_lifetime = 5.0
 	else:
 		trail_lifetime = 12.0
+	if not phases.is_empty():
+		trail_lifetime *= PhaseRules.get_trail_multiplier(elapsed_time, phases)
 
 	for i in range(stamps_count):
 		var stamp = stamps[i]

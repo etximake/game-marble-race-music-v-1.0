@@ -12,7 +12,9 @@ static func get_current_phase(time: float, phases: Array) -> Dictionary:
 		return phases[phases.size() - 1]
 	return {}
 
-# Interpolates a multiplier smoothly between phases based on current time
+# Interpolates a multiplier with a short transition at phase boundaries.
+# The previous implementation spread the transition across the whole phase,
+# delaying the intended build-up burst until the phase was nearly over.
 static func get_interpolated_value(time: float, phases: Array, key: String, default_val: float = 1.0) -> float:
 	if phases.is_empty():
 		return default_val
@@ -29,10 +31,7 @@ static func get_interpolated_value(time: float, phases: Array, key: String, defa
 	if time >= last_end:
 		return float(phases[last_idx].get(key, default_val))
 		
-	# 2. Interpolate between current phase and the next phase, or within the current phase if it progresses
-	# To make it super smooth, we can interpolate from the midpoint of current phase to the midpoint of the next,
-	# or simply lerp over the duration of the current phase from its starting value (or previous phase value) to its target value.
-	# Let's find which phase we are in, and interpolate from the previous phase's value to current phase's value.
+	# 2. Transition quickly from the previous phase into the current phase.
 	for i in range(phases.size()):
 		var phase = phases[i]
 		var start = float(phase.get("start_time", 0.0))
@@ -46,12 +45,11 @@ static func get_interpolated_value(time: float, phases: Array, key: String, defa
 				prev_val = float(phase.get(key, default_val)) # if first phase, start with its own value
 				
 			var target_val = float(phase.get(key, default_val))
-			var duration = end - start
-			if duration <= 0.0:
+			var transition_duration = minf(0.25, maxf((end - start) * 0.1, 0.01))
+			if transition_duration <= 0.0:
 				return target_val
 				
-			var t = (time - start) / duration
-			# Ease interpolation for smoother transition (smoothstep)
+			var t = clampf((time - start) / transition_duration, 0.0, 1.0)
 			var smooth_t = t * t * (3.0 - 2.0 * t)
 			return lerpf(prev_val, target_val, smooth_t)
 			

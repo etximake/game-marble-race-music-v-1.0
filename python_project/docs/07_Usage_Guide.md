@@ -13,30 +13,35 @@ Môi trường ảo `.env` đã được thiết lập sẵn tại thư mục g�
 
 ## 2. Cách chạy chương trình
 
-Chương trình được thiết kế chạy trực tiếp với các cấu hình cứng được khai báo bên trong mã nguồn để đơn giản hóa thao tác.
+Cấu hình tạo job nằm trong một profile JSON. Profile mặc định là
+`python_project/job_profile.json`; có thể chọn profile khác bằng `--profile`.
 
 Thực hiện chạy lệnh sau từ thư mục gốc của dự án:
 
 ```bash
 # Trên Windows PowerShell
 & "D:\HOANG HA\Tai lieu game godot\game-marble-race-music-v-1.0\.env\Scripts\python.exe" python_project/main.py
+
+# Chọn profile job khác
+& ".env\Scripts\python.exe" python_project/main.py --profile job_profile_002.json
 ```
 
 ## 3. Cách tùy chỉnh tham số
 
-Mở file `python_project/main.py` và sửa trực tiếp các biến cấu hình trong hàm `main()`:
+Chỉnh `python_project/job_profile.json` thay vì sửa mã nguồn:
 
 ```python
-def main():
-    # Điều chỉnh trực tiếp các tham số ở đây:
-    input_path = "source/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3"  # Đường dẫn đến file nhạc đầu vào (.wav hoặc .mp3)
-    job_id = "job_001"                      # ID của Job để phân biệt thư mục xuất kết quả
-    slice_mode_str = "fixed_interval"       # Chế độ cắt: "fixed_interval" hoặc "manual_markers"
-    interval = 0.2                          # Khoảng thời gian cắt mỗi nốt (giây) cho chế độ fixed_interval
-    markers = []                            # Danh sách mốc thời gian cắt cho chế độ manual_markers (ví dụ: [0.5, 1.2, 2.0])
-    max_notes = 400                         # Số lượng nốt cắt tối đa để tránh lỗi bộ nhớ/âm thanh
-    fade_in_ms = 3                          # Thời gian fade-in (mili giây) để tránh tiếng click/pop
-    fade_out_ms = 3                         # Thời gian fade-out (mili giây) để tránh tiếng click/pop
+{
+  "job_id": "job_002",
+  "gameplay_template_path": "../shared/gameplay_template.json",
+  "input_path": "source/another_song.mp3",
+  "target_duration_seconds": 22.0,
+  "slice_mode": "fixed_interval",
+  "slice_interval_seconds": 0.4,
+  "max_note_count": 400,
+  "fade_in_ms": 3,
+  "fade_out_ms": 3
+}
 ```
 
 ## 4. Cấu trúc kết quả đầu ra
@@ -45,10 +50,13 @@ Sau khi chạy thành công, kết quả sẽ được tạo tại thư mục:
 `generated/jobs/{job_id}/`
 
 Cấu trúc gồm:
-*   `video_config.json`: File cấu hình chính chứa thông tin video, âm thanh, gameplay và các phase tiến trình. Godot sẽ trực tiếp đọc file này.
+*   `video_config.json`: Job Music JSON chứa duration, output name, âm thanh, text và assets riêng của job. Godot merge file này với `gameplay_config.json` cùng thư mục.
+*   `gameplay_config.json`: Snapshot gameplay được Python copy từ template tại thời điểm tạo job. Chứa mode, gameplay, visual, quiz, timeline và phases.
 *   `source_audio.wav`: File nhạc gốc đã được chuẩn hóa về định dạng Mono 44100Hz.
 *   `metadata.json`: Lưu trữ thông tin phụ về quá trình xử lý (số lượng nốt, thời gian chạy).
 *   `note_clips/`: Thư mục chứa các file nốt nhạc nhỏ (`note_0001.wav`, `note_0002.wav`,...) đã được cắt kèm hiệu ứng fade-in/fade-out 3ms.
+
+Godot không đọc trực tiếp `shared/gameplay_template.json` khi chạy job. File shared chỉ là preset đầu vào để Python tạo `gameplay_config.json`.
 
 ## 5. Chạy kiểm tra Unit Test
 

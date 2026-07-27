@@ -2,7 +2,7 @@
 class_name ConfigLoader
 extends RefCounted
 
-static func load_config(file_path: String, template_path: String = "res://shared/gameplay_template.json") -> Dictionary:
+static func load_config(file_path: String, template_path: String = "") -> Dictionary:
 	# 1. Load Job Config (contains song data: audio notes, duration, etc.)
 	if not FileAccess.file_exists(file_path):
 		return {"error": "ConfigFileNotFound", "message": "Cannot find video_config.json at: " + file_path}
@@ -22,9 +22,11 @@ static func load_config(file_path: String, template_path: String = "res://shared
 	if typeof(job_data) != TYPE_DICTIONARY:
 		return {"error": "InvalidConfigJson", "message": "Config must be a JSON object."}
 		
-	# 2. Load Gameplay Template (contains ball, arena, visual, phases, etc.)
+	# 2. Load the gameplay snapshot belonging to this job.
+	if template_path == "":
+		template_path = file_path.get_base_dir() + "/gameplay_config.json"
 	if not FileAccess.file_exists(template_path):
-		return {"error": "ConfigFileNotFound", "message": "Cannot find gameplay_template.json at: " + template_path}
+		return {"error": "ConfigFileNotFound", "message": "Cannot find gameplay_config.json at: " + template_path}
 		
 	var temp_file = FileAccess.open(template_path, FileAccess.READ)
 	if not temp_file:
@@ -41,21 +43,60 @@ static func load_config(file_path: String, template_path: String = "res://shared
 	if typeof(template_data) != TYPE_DICTIONARY:
 		return {"error": "InvalidConfigJson", "message": "Template Config must be a JSON object."}
 		
+	# Job data must not override gameplay-owned configuration.
+	for forbidden_field in ["game_mode", "gameplay", "visual", "phases"]:
+		if job_data.has(forbidden_field):
+			return {"error": "InvalidJobConfig", "message": "Job config must not contain template-owned field: " + forbidden_field}
+
 	# 3. Merge Job Config into a copy of Template Config
 	var merged_data = template_data.duplicate(true)
 	_deep_merge(merged_data, job_data)
 	
-	# 4. Dynamically scale the last phase's end_time to match the song duration
+	# Job-specific assets are applied after the template merge.
+	var job_assets = job_data.get("job_assets", {})
+	if typeof(job_assets) == TYPE_DICTIONARY:
+		var icon_path = str(job_assets.get("ball_icon_path", ""))
+		if icon_path != "":
+			merged_data["visual"]["ball_icon_path"] = icon_path
+		var ball_color = str(job_assets.get("ball_color", ""))
+		if ball_color != "":
+			merged_data["visual"]["ball_color"] = ball_color
+
+	# 4. Build runtime phase times from the template timeline policy and job duration.
 	if merged_data.has("phases") and typeof(merged_data["phases"]) == TYPE_ARRAY:
 		var phases = merged_data["phases"] as Array
 		if not phases.is_empty():
-			var last_phase = phases[-1]
-			if typeof(last_phase) == TYPE_DICTIONARY:
-				var duration = float(merged_data.get("video", {}).get("duration", 46.0))
-				last_phase["end_time"] = duration
+			var duration = float(merged_data.get("video", {}).get("duration", 46.0))
+			var timeline = merged_data.get("timeline", {})
+			if typeof(timeline) != TYPE_DICTIONARY:
+				return {"error": "InvalidTimelineConfig", "message": "Gameplay template timeline must be an object."}
+			if phases.size() == 1:
+				phases[0]["start_time"] = 0.0
+				phases[0]["end_time"] = duration
+			else:
+				if not timeline.has("intro_duration_seconds") or not timeline.has("build_up_end_ratio"):
+					return {"error": "InvalidTimelineConfig", "message": "Timeline must define intro_duration_seconds and build_up_end_ratio."}
+				var intro_duration = minf(float(timeline["intro_duration_seconds"]), duration * 0.1)
+				var build_up_end = duration * clampf(float(timeline["build_up_end_ratio"]), 0.1, 0.95)
+				if intro_duration <= 0.0 or build_up_end <= intro_duration:
+					return {"error": "InvalidTimelineConfig", "message": "Timeline anchors must leave room for intro and build-up."}
+				phases[0]["start_time"] = 0.0
+				phases[0]["end_time"] = intro_duration
+				phases[1]["start_time"] = intro_duration
+				phases[1]["end_time"] = build_up_end
+				for i in range(2, phases.size()):
+					phases[i]["start_time"] = build_up_end
+					phases[i]["end_time"] = duration
+	if merged_data.has("quiz") and typeof(merged_data["quiz"]) == TYPE_DICTIONARY:
+		var quiz = merged_data["quiz"] as Dictionary
+		var quiz_timeline = merged_data.get("timeline", {})
+		if not quiz_timeline.has("reveal_ratio"):
+			return {"error": "InvalidTimelineConfig", "message": "Timeline must define reveal_ratio."}
+		var reveal_ratio = clampf(float(quiz_timeline["reveal_ratio"]), 0.5, 0.99)
+		quiz["reveal_time"] = float(merged_data.get("video", {}).get("duration", 0.0)) * reveal_ratio
 	
 	# 5. Validate required top-level fields on the merged config
-	var required_fields = ["project_version", "game_mode", "video", "audio", "gameplay", "visual", "text", "phases"]
+	var required_fields = ["game_mode", "video", "audio", "gameplay", "visual", "text", "quiz", "timeline", "phases"]
 	for field in required_fields:
 		if not merged_data.has(field):
 			return {"error": "MissingRequiredConfigField", "message": "Missing required field: " + field}
@@ -70,6 +111,35 @@ static func load_config(file_path: String, template_path: String = "res://shared
 		return {"error": "InvalidConfigValue", "message": "duration must be greater than 0"}
 	if int(video.get("fps", 0)) <= 0:
 		return {"error": "InvalidConfigValue", "message": "fps must be greater than 0"}
+	if not GameModeRegistry.is_supported(str(merged_data.get("game_mode", ""))):
+		return {"error": "UnsupportedGameMode", "message": "Unsupported game mode: " + str(merged_data.get("game_mode", ""))}
+
+	var notes = merged_data.get("audio", {}).get("notes", [])
+	if typeof(notes) != TYPE_ARRAY or notes.is_empty():
+		return {"error": "InvalidAudioConfig", "message": "audio.notes must contain at least one note."}
+	for i in range(notes.size()):
+		var note = notes[i]
+		if typeof(note) != TYPE_DICTIONARY or int(note.get("index", -1)) != i or str(note.get("file", "")) == "":
+			return {"error": "InvalidAudioConfig", "message": "audio.notes must have contiguous indexes and file names."}
+		var note_path = PathResolver.resolve_note_path(file_path.get_base_dir(), str(merged_data.get("audio", {}).get("note_clips_dir", "note_clips/")), str(note.get("file", "")))
+		if not FileAccess.file_exists(note_path):
+			return {"error": "AudioClipMissing", "message": "Cannot find note clip: " + note_path}
+
+	var phases_to_validate = merged_data.get("phases", [])
+	if typeof(phases_to_validate) != TYPE_ARRAY or phases_to_validate.is_empty():
+		return {"error": "InvalidPhaseConfig", "message": "At least one gameplay phase is required."}
+	var previous_end = 0.0
+	for i in range(phases_to_validate.size()):
+		var phase = phases_to_validate[i]
+		if typeof(phase) != TYPE_DICTIONARY:
+			return {"error": "InvalidPhaseConfig", "message": "Every phase must be an object."}
+		var phase_start = float(phase.get("start_time", -1.0))
+		var phase_end = float(phase.get("end_time", -1.0))
+		if phase_start < 0.0 or phase_end <= phase_start or (i > 0 and absf(phase_start - previous_end) > 0.001):
+			return {"error": "InvalidPhaseConfig", "message": "Gameplay phases must be contiguous and increasing."}
+		previous_end = phase_end
+	if absf(previous_end - float(video.get("duration", 0.0))) > 0.001:
+		return {"error": "InvalidPhaseConfig", "message": "The last phase must end at video.duration."}
 	
 	return {"success": true, "data": merged_data}
 

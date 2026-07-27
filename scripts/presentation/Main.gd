@@ -7,8 +7,8 @@ extends Node
 @onready var error_overlay: ErrorOverlay = $ErrorOverlay
 
 var config_path: String = "res://generated/jobs/job_001/video_config.json"
-var template_path: String = "res://shared/gameplay_template.json"
-var job_folder: String = "res://generated/jobs/job_001/"
+var template_path: String = ""
+var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D
 
@@ -32,8 +32,8 @@ func _parse_arguments():
 		elif args[i] == "--job_dir" and i + 1 < args.size():
 			job_folder = args[i+1]
 			
-	# Automatically derive job folder from config_path if not set
-	if job_folder == "res://generated/jobs/job_001/" and config_path != "res://generated/jobs/job_001/video_config.json":
+	# Always derive the job folder from the config unless explicitly overridden.
+	if job_folder == "":
 		job_folder = config_path.get_base_dir()
 
 func _load_and_start():
@@ -51,10 +51,18 @@ func _load_and_start():
 		return
 		
 	# Setup audio player
-	audio_note_player.setup(video_config.get_audio_config(), job_folder)
+	if not audio_note_player.setup(video_config.get_audio_config(), job_folder):
+		error_overlay.show_error("AudioClipMissing", audio_note_player.setup_error)
+		return
 	
 	# Setup UI Overlay
 	ui_overlay.setup(video_config.get_text_config())
+	var visual_config = video_config.get_visual_config().duplicate(true)
+	var job_assets = video_config.get_job_assets()
+	if job_assets.has("ball_icon_path"):
+		visual_config["ball_icon_path"] = job_assets.get("ball_icon_path", "")
+	if job_assets.has("ball_color") and str(job_assets.get("ball_color", "")) != "":
+		visual_config["ball_color"] = job_assets.get("ball_color", "")
 	
 	# Instantiating active game mode view
 	var view_path = GameModeFactory.get_mode_view_path(mode_name)
@@ -76,10 +84,10 @@ func _load_and_start():
 		
 	# Setup view
 	if active_mode_view.has_method("setup"):
-		active_mode_view.setup(controller, video_config.get_visual_config(), job_folder, video_config.get_phases())
+		active_mode_view.setup(controller, visual_config, job_folder, video_config.get_phases(), video_config.get_quiz_config())
 		
 	# Setup background color
-	var bg_color = Color.from_string(video_config.get_visual_config().get("background_color", "#050505"), Color.BLACK)
+	var bg_color = Color.from_string(visual_config.get("background_color", "#050505"), Color.BLACK)
 	RenderingServer.set_default_clear_color(bg_color)
 	
 	# Wire signals

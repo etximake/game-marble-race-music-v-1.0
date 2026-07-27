@@ -1,96 +1,89 @@
-# 04 - Video Config Generator
+# 04 - Job Music JSON Generator
 
 ## Muc tieu
 
-Tao `video_config.json` de Godot doc va render video.
-
-## Input
-
-- Audio duration.
-- Folder note clips.
-- Danh sach note file.
-- Preset mac dinh cho `game_mode`, gameplay cua mode dau tien, visual, text, phases.
+Tao du lieu rieng cua mot job am thanh de Godot merge voi `shared/gameplay_template.json`.
+Python khong sinh gameplay, visual, game mode hoac phases.
 
 ## Output
 
 ```text
 generated/jobs/job_001/video_config.json
+generated/jobs/job_001/gameplay_config.json
 ```
 
-## Default video config
+File Job Music JSON gom:
 
 ```text
-width: 1080
-height: 1920
-fps: 60
-duration: lay tu audio hoac nguoi dung nhap
+video.duration
+video.output_name
+text
+job_assets
 ```
 
-## Default game mode
+## Ownership
 
-```text
-game_mode: circle_bounce
+Python so huu:
+
+- duration cua audio.
+- ten output cua job.
+- note clips va thu tu phat.
+- audio delay/loop settings.
+- noi dung text cua video.
+- asset rieng cua job, vi du duong dan logo ball.
+
+Godot template so huu:
+
+- game_mode.
+- width, height, fps.
+- ball/arena physics.
+- visual behavior.
+- phases va cac multiplier tien hoa.
+
+## Audio settings
+
+```json
+{
+  "note_mode": "next_note_on_trigger",
+  "note_clips_dir": "note_clips/",
+  "audio_delay_ms": 0,
+  "loop_notes": true,
+  "notes": [
+    {"index": 0, "file": "note_0001.wav"}
+  ]
+}
 ```
 
-## Default circle_bounce gameplay config
+Moi note la mot clip doc lap. Godot phat mot clip khi mode tao `note_triggered`.
 
-### ball
+## Validation
 
-```text
-start_position: [540.0, 515.0]
-start_velocity: [0.0, 600.0]
-start_radius: 24.0
-max_radius: 320.0
-max_radius_ratio: 0.8
-growth_per_hit: 1.025
-speed_growth_per_hit: 1.012
-max_speed: 1600.0
-```
-
-### arena
-
-```text
-type: circle
-center: [540, 960]
-radius: 470.0
-line_width: 10.0
-```
-
-## Default visual config
-
-```text
-background_color: #050505
-ball_color: #00ffcc
-use_glow: true
-use_rainbow_trail: true
-trail_mode: web
-trail_persistence: 1.0
-impact_effect: true
-```
-
-## Default phases
-
-Timeline cua phases tuy thuoc vao thoi luong cua audio (`duration`):
-- Neu `duration > 10.0` giay:
-  - `intro`: `0.0` den `5.0` giay
-  - `build_up`: `5.0` den `10.0` giay
-  - `final_storm`: `10.0` den `duration` giay
-- Neu `duration <= 10.0` giay:
-  - `intro`: `0.0` den `duration * 0.3` giay
-  - `build_up`: `duration * 0.3` den `duration * 0.6` giay
-  - `final_storm`: `duration * 0.6` den `duration` giay
-
-Cac he so multiplier tuong ung cua tung phase:
-- `intro`: `speed_multiplier=1.0`, `growth_multiplier=1.0`, `trail_multiplier=1.0`
-- `build_up`: `speed_multiplier=1.2`, `growth_multiplier=1.15`, `trail_multiplier=1.3`
-- `final_storm`: `speed_multiplier=1.6`, `growth_multiplier=1.35`, `trail_multiplier=2.0`
-
-## Validate
-
-Sau khi tao JSON, Python phai validate theo:
+Python validate Job Music JSON bang:
 
 ```text
 shared/video_config.schema.json
 ```
 
-Neu validate loi, khong xuat job hoan chinh.
+Validator kiem tra duration, danh sach notes va index lien tuc. Gameplay va phase duoc validate sau khi Godot merge voi template.
+
+## Short video profile
+
+Job production nen co duration tu 20 den 25 giay, mac dinh 22 giay. Audio source
+duoc cat truoc khi slicing de source_audio.wav, note clips va video.duration
+luon dung cung mot timeline. Godot dat intro 2 giay, build-up den khoang 73%
+duration va final storm o phan cuoi.
+
+Thoi luong va slicing duoc dat trong `python_project/job_profile.json`, khong
+hard-code trong `main.py`. Gameplay template luu timeline policy:
+`intro_duration_seconds`, `build_up_end_ratio`, va `reveal_ratio`.
+
+Python copy gameplay template thanh `gameplay_config.json` trong chinh job
+folder. Moi job vi vay co snapshot gameplay rieng.
+
+Tao job khac bang profile khac:
+
+```text
+python main.py --profile job_profile_002.json
+```
+
+Godot tu doc `gameplay_config.json` nam canh `video_config.json` trong job.

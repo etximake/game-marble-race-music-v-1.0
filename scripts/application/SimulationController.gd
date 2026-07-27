@@ -57,7 +57,7 @@ func _process(delta: float):
 			
 		for event in events:
 			mode_event.emit(event)
-			if event.type == "note_triggered" or event.type == "ball_collided":
+			if event.type == "note_triggered":
 				var trigger_payload = event.payload
 				var trigger = NoteTrigger.new(current_time, event.type, trigger_payload)
 				note_triggered.emit(trigger)

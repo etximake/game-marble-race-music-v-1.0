@@ -13,6 +13,7 @@ var audio_delay_ms: float = 0.0
 var loaded_streams: Dictionary = {}
 var players: Array[AudioStreamPlayer] = []
 var last_play_time_ms: float = 0.0
+var setup_error: String = ""
 
 func _ready():
 	# Create a pool of AudioStreamPlayers to support polyphony
@@ -32,6 +33,7 @@ func setup(audio_config: Dictionary, p_job_folder: String):
 	sequence = NoteSequence.new(notes, loop_notes)
 	loaded_streams.clear()
 	last_play_time_ms = 0.0
+	setup_error = ""
 	
 	# Pre-load note clips to prevent stuttering during simulation
 	for note in notes:
@@ -42,8 +44,11 @@ func setup(audio_config: Dictionary, p_job_folder: String):
 			if stream:
 				loaded_streams[note_file] = stream
 			else:
-				# Show visual warning/error inside the game or print it
-				printerr("Failed to load note clip: ", full_path)
+				setup_error = "Failed to load note clip: " + full_path
+				printerr(setup_error)
+	if setup_error != "":
+			return false
+	return true
 
 func play_next_note():
 	if not sequence or not sequence.has_next_note():

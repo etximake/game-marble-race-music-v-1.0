@@ -7,9 +7,6 @@ var raw_data: Dictionary = {}
 func _init(data: Dictionary):
 	raw_data = data
 
-func get_project_version() -> String:
-	return raw_data.get("project_version", "1.0")
-
 func get_game_mode() -> String:
 	return raw_data.get("game_mode", "")
 
@@ -44,6 +41,15 @@ func get_visual_config() -> Dictionary:
 
 func get_text_config() -> Dictionary:
 	return raw_data.get("text", {})
+
+func get_quiz_config() -> Dictionary:
+	return raw_data.get("quiz", {})
+
+func get_timeline_config() -> Dictionary:
+	return raw_data.get("timeline", {})
+
+func get_job_assets() -> Dictionary:
+	return raw_data.get("job_assets", {})
 
 func get_phases() -> Array:
 	return raw_data.get("phases", [])

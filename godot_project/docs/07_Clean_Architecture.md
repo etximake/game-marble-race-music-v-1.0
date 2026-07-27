@@ -231,7 +231,6 @@ PolygonBouncePhysics
 Nen co accessor ro nghia:
 
 ```text
-get_project_version()
 get_game_mode()
 get_video_settings()
 get_audio_settings()
@@ -259,7 +258,6 @@ Trach nhiem chung:
 
 ```text
 load config
-validate supported project_version
 select game mode
 setup active mode runner
 update simulation time

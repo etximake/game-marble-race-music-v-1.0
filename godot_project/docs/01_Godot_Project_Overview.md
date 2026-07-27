@@ -14,7 +14,7 @@ polygon_bounce
 ## Data flow
 
 ```text
-video_config.json
+video_config.json + gameplay_config.json
   -> ConfigLoader
   -> VideoConfig
   -> GameModeFactory
@@ -33,6 +33,7 @@ video_config.json
 Quan ly lifecycle chung:
 
 - load config
+- load two JSON files from the same job folder
 - setup shared scene
 - chon active game mode
 - ket noi signals/events
@@ -109,6 +110,10 @@ Moi mode co renderer rieng. Trong MVP:
 ### UIOverlay
 
 Hien top text va bottom text.
+
+## Quiz va timeline
+
+`gameplay_config.json` cung cap `quiz` va `timeline`. `ConfigLoader.gd` tinh phase runtime theo `video.duration` cua Job Music JSON, gom intro, build-up, final storm va quiz reveal.
 
 ## Nguyen tac
 

@@ -42,33 +42,37 @@
     "trail_mode": "web",
     "trail_persistence": 1.0,
     "impact_effect": true,
-    "use_ball_icon": false,
+    "use_ball_icon": true,
     "ball_icon_path": "",
-    "icon_silhouette_mode": false,
+    "icon_silhouette_mode": true,
     "icon_reveal_phase": "final_storm",
     "icon_rotation_mode": "none"
+  },
+  "quiz": {
+    "enabled": true,
+    "prompt": "GUESS THE LOGO",
+    "reveal_style": "radial_wipe"
+  },
+  "timeline": {
+    "intro_duration_seconds": 2.0,
+    "build_up_end_ratio": 0.73,
+    "reveal_ratio": 0.89
   },
   "phases": [
     {
       "name": "intro",
-      "start_time": 0.0,
-      "end_time": 3.0,
       "speed_multiplier": 1.0,
       "growth_multiplier": 1.0,
       "trail_multiplier": 1.0
     },
     {
       "name": "build_up",
-      "start_time": 3.0,
-      "end_time": 10.0,
       "speed_multiplier": 2.0,
       "growth_multiplier": 2.0,
       "trail_multiplier": 1.5
     },
     {
       "name": "final_storm",
-      "start_time": 10.0,
-      "end_time": 85.0,
       "speed_multiplier": 3.5,
       "growth_multiplier": 4.0,
       "trail_multiplier": 3.0

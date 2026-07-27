@@ -21,24 +21,25 @@
 
 ## Field bat buoc
 
+Job Music JSON:
+
 ```text
-project_version
-game_mode
 video
 audio
+text
+job_assets
+```
+
+Merged runtime config additionally contains:
+
+```text
+game_mode
 gameplay
 visual
-text
 phases
+quiz
+timeline
 ```
-
-## project_version
-
-```json
-"1.0"
-```
-
-Dung de quan ly thay doi contract. Godot nen warning hoac fail neu gap major version khong ho tro.
 
 ## game_mode
 
