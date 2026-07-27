@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cl7wyebyadwn8"
+path="res://.godot/imported/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3-17bca5a4202bb4aa034b8b8d617c1152.mp3str"
+
+[deps]
+
+source_file="res://python_project/source/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3"
+dest_files=["res://.godot/imported/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3-17bca5a4202bb4aa034b8b8d617c1152.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

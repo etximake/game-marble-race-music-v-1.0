@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://df4k3u8gexljo"]
+
+[ext_resource type="Script" path="res://scripts/presentation/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/application/SimulationController.gd" id="2_sim"]
+[ext_resource type="PackedScene" path="res://scenes/AudioNotePlayer.tscn" id="3_audio"]
+[ext_resource type="PackedScene" path="res://scenes/UIOverlay.tscn" id="4_ui"]
+[ext_resource type="PackedScene" path="res://scenes/ErrorOverlay.tscn" id="5_error"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="SimulationController" type="Node" parent="."]
+script = ExtResource("2_sim")
+
+[node name="AudioNotePlayer" parent="." instance=ExtResource("3_audio")]
+
+[node name="UIOverlay" parent="." instance=ExtResource("4_ui")]
+
+[node name="ErrorOverlay" parent="." instance=ExtResource("5_error")]

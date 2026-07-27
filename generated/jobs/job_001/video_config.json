@@ -1,0 +1,939 @@
+{
+  "project_version": "1.0",
+  "game_mode": "circle_bounce",
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 60,
+    "duration": 84.799,
+    "output_name": "music_ball_job_001"
+  },
+  "audio": {
+    "note_mode": "next_note_on_trigger",
+    "note_clips_dir": "note_clips/",
+    "audio_delay_ms": 0,
+    "loop_notes": true,
+    "notes": [
+      {
+        "index": 0,
+        "file": "note_0001.wav"
+      },
+      {
+        "index": 1,
+        "file": "note_0002.wav"
+      },
+      {
+        "index": 2,
+        "file": "note_0003.wav"
+      },
+      {
+        "index": 3,
+        "file": "note_0004.wav"
+      },
+      {
+        "index": 4,
+        "file": "note_0005.wav"
+      },
+      {
+        "index": 5,
+        "file": "note_0006.wav"
+      },
+      {
+        "index": 6,
+        "file": "note_0007.wav"
+      },
+      {
+        "index": 7,
+        "file": "note_0008.wav"
+      },
+      {
+        "index": 8,
+        "file": "note_0009.wav"
+      },
+      {
+        "index": 9,
+        "file": "note_0010.wav"
+      },
+      {
+        "index": 10,
+        "file": "note_0011.wav"
+      },
+      {
+        "index": 11,
+        "file": "note_0012.wav"
+      },
+      {
+        "index": 12,
+        "file": "note_0013.wav"
+      },
+      {
+        "index": 13,
+        "file": "note_0014.wav"
+      },
+      {
+        "index": 14,
+        "file": "note_0015.wav"
+      },
+      {
+        "index": 15,
+        "file": "note_0016.wav"
+      },
+      {
+        "index": 16,
+        "file": "note_0017.wav"
+      },
+      {
+        "index": 17,
+        "file": "note_0018.wav"
+      },
+      {
+        "index": 18,
+        "file": "note_0019.wav"
+      },
+      {
+        "index": 19,
+        "file": "note_0020.wav"
+      },
+      {
+        "index": 20,
+        "file": "note_0021.wav"
+      },
+      {
+        "index": 21,
+        "file": "note_0022.wav"
+      },
+      {
+        "index": 22,
+        "file": "note_0023.wav"
+      },
+      {
+        "index": 23,
+        "file": "note_0024.wav"
+      },
+      {
+        "index": 24,
+        "file": "note_0025.wav"
+      },
+      {
+        "index": 25,
+        "file": "note_0026.wav"
+      },
+      {
+        "index": 26,
+        "file": "note_0027.wav"
+      },
+      {
+        "index": 27,
+        "file": "note_0028.wav"
+      },
+      {
+        "index": 28,
+        "file": "note_0029.wav"
+      },
+      {
+        "index": 29,
+        "file": "note_0030.wav"
+      },
+      {
+        "index": 30,
+        "file": "note_0031.wav"
+      },
+      {
+        "index": 31,
+        "file": "note_0032.wav"
+      },
+      {
+        "index": 32,
+        "file": "note_0033.wav"
+      },
+      {
+        "index": 33,
+        "file": "note_0034.wav"
+      },
+      {
+        "index": 34,
+        "file": "note_0035.wav"
+      },
+      {
+        "index": 35,
+        "file": "note_0036.wav"
+      },
+      {
+        "index": 36,
+        "file": "note_0037.wav"
+      },
+      {
+        "index": 37,
+        "file": "note_0038.wav"
+      },
+      {
+        "index": 38,
+        "file": "note_0039.wav"
+      },
+      {
+        "index": 39,
+        "file": "note_0040.wav"
+      },
+      {
+        "index": 40,
+        "file": "note_0041.wav"
+      },
+      {
+        "index": 41,
+        "file": "note_0042.wav"
+      },
+      {
+        "index": 42,
+        "file": "note_0043.wav"
+      },
+      {
+        "index": 43,
+        "file": "note_0044.wav"
+      },
+      {
+        "index": 44,
+        "file": "note_0045.wav"
+      },
+      {
+        "index": 45,
+        "file": "note_0046.wav"
+      },
+      {
+        "index": 46,
+        "file": "note_0047.wav"
+      },
+      {
+        "index": 47,
+        "file": "note_0048.wav"
+      },
+      {
+        "index": 48,
+        "file": "note_0049.wav"
+      },
+      {
+        "index": 49,
+        "file": "note_0050.wav"
+      },
+      {
+        "index": 50,
+        "file": "note_0051.wav"
+      },
+      {
+        "index": 51,
+        "file": "note_0052.wav"
+      },
+      {
+        "index": 52,
+        "file": "note_0053.wav"
+      },
+      {
+        "index": 53,
+        "file": "note_0054.wav"
+      },
+      {
+        "index": 54,
+        "file": "note_0055.wav"
+      },
+      {
+        "index": 55,
+        "file": "note_0056.wav"
+      },
+      {
+        "index": 56,
+        "file": "note_0057.wav"
+      },
+      {
+        "index": 57,
+        "file": "note_0058.wav"
+      },
+      {
+        "index": 58,
+        "file": "note_0059.wav"
+      },
+      {
+        "index": 59,
+        "file": "note_0060.wav"
+      },
+      {
+        "index": 60,
+        "file": "note_0061.wav"
+      },
+      {
+        "index": 61,
+        "file": "note_0062.wav"
+      },
+      {
+        "index": 62,
+        "file": "note_0063.wav"
+      },
+      {
+        "index": 63,
+        "file": "note_0064.wav"
+      },
+      {
+        "index": 64,
+        "file": "note_0065.wav"
+      },
+      {
+        "index": 65,
+        "file": "note_0066.wav"
+      },
+      {
+        "index": 66,
+        "file": "note_0067.wav"
+      },
+      {
+        "index": 67,
+        "file": "note_0068.wav"
+      },
+      {
+        "index": 68,
+        "file": "note_0069.wav"
+      },
+      {
+        "index": 69,
+        "file": "note_0070.wav"
+      },
+      {
+        "index": 70,
+        "file": "note_0071.wav"
+      },
+      {
+        "index": 71,
+        "file": "note_0072.wav"
+      },
+      {
+        "index": 72,
+        "file": "note_0073.wav"
+      },
+      {
+        "index": 73,
+        "file": "note_0074.wav"
+      },
+      {
+        "index": 74,
+        "file": "note_0075.wav"
+      },
+      {
+        "index": 75,
+        "file": "note_0076.wav"
+      },
+      {
+        "index": 76,
+        "file": "note_0077.wav"
+      },
+      {
+        "index": 77,
+        "file": "note_0078.wav"
+      },
+      {
+        "index": 78,
+        "file": "note_0079.wav"
+      },
+      {
+        "index": 79,
+        "file": "note_0080.wav"
+      },
+      {
+        "index": 80,
+        "file": "note_0081.wav"
+      },
+      {
+        "index": 81,
+        "file": "note_0082.wav"
+      },
+      {
+        "index": 82,
+        "file": "note_0083.wav"
+      },
+      {
+        "index": 83,
+        "file": "note_0084.wav"
+      },
+      {
+        "index": 84,
+        "file": "note_0085.wav"
+      },
+      {
+        "index": 85,
+        "file": "note_0086.wav"
+      },
+      {
+        "index": 86,
+        "file": "note_0087.wav"
+      },
+      {
+        "index": 87,
+        "file": "note_0088.wav"
+      },
+      {
+        "index": 88,
+        "file": "note_0089.wav"
+      },
+      {
+        "index": 89,
+        "file": "note_0090.wav"
+      },
+      {
+        "index": 90,
+        "file": "note_0091.wav"
+      },
+      {
+        "index": 91,
+        "file": "note_0092.wav"
+      },
+      {
+        "index": 92,
+        "file": "note_0093.wav"
+      },
+      {
+        "index": 93,
+        "file": "note_0094.wav"
+      },
+      {
+        "index": 94,
+        "file": "note_0095.wav"
+      },
+      {
+        "index": 95,
+        "file": "note_0096.wav"
+      },
+      {
+        "index": 96,
+        "file": "note_0097.wav"
+      },
+      {
+        "index": 97,
+        "file": "note_0098.wav"
+      },
+      {
+        "index": 98,
+        "file": "note_0099.wav"
+      },
+      {
+        "index": 99,
+        "file": "note_0100.wav"
+      },
+      {
+        "index": 100,
+        "file": "note_0101.wav"
+      },
+      {
+        "index": 101,
+        "file": "note_0102.wav"
+      },
+      {
+        "index": 102,
+        "file": "note_0103.wav"
+      },
+      {
+        "index": 103,
+        "file": "note_0104.wav"
+      },
+      {
+        "index": 104,
+        "file": "note_0105.wav"
+      },
+      {
+        "index": 105,
+        "file": "note_0106.wav"
+      },
+      {
+        "index": 106,
+        "file": "note_0107.wav"
+      },
+      {
+        "index": 107,
+        "file": "note_0108.wav"
+      },
+      {
+        "index": 108,
+        "file": "note_0109.wav"
+      },
+      {
+        "index": 109,
+        "file": "note_0110.wav"
+      },
+      {
+        "index": 110,
+        "file": "note_0111.wav"
+      },
+      {
+        "index": 111,
+        "file": "note_0112.wav"
+      },
+      {
+        "index": 112,
+        "file": "note_0113.wav"
+      },
+      {
+        "index": 113,
+        "file": "note_0114.wav"
+      },
+      {
+        "index": 114,
+        "file": "note_0115.wav"
+      },
+      {
+        "index": 115,
+        "file": "note_0116.wav"
+      },
+      {
+        "index": 116,
+        "file": "note_0117.wav"
+      },
+      {
+        "index": 117,
+        "file": "note_0118.wav"
+      },
+      {
+        "index": 118,
+        "file": "note_0119.wav"
+      },
+      {
+        "index": 119,
+        "file": "note_0120.wav"
+      },
+      {
+        "index": 120,
+        "file": "note_0121.wav"
+      },
+      {
+        "index": 121,
+        "file": "note_0122.wav"
+      },
+      {
+        "index": 122,
+        "file": "note_0123.wav"
+      },
+      {
+        "index": 123,
+        "file": "note_0124.wav"
+      },
+      {
+        "index": 124,
+        "file": "note_0125.wav"
+      },
+      {
+        "index": 125,
+        "file": "note_0126.wav"
+      },
+      {
+        "index": 126,
+        "file": "note_0127.wav"
+      },
+      {
+        "index": 127,
+        "file": "note_0128.wav"
+      },
+      {
+        "index": 128,
+        "file": "note_0129.wav"
+      },
+      {
+        "index": 129,
+        "file": "note_0130.wav"
+      },
+      {
+        "index": 130,
+        "file": "note_0131.wav"
+      },
+      {
+        "index": 131,
+        "file": "note_0132.wav"
+      },
+      {
+        "index": 132,
+        "file": "note_0133.wav"
+      },
+      {
+        "index": 133,
+        "file": "note_0134.wav"
+      },
+      {
+        "index": 134,
+        "file": "note_0135.wav"
+      },
+      {
+        "index": 135,
+        "file": "note_0136.wav"
+      },
+      {
+        "index": 136,
+        "file": "note_0137.wav"
+      },
+      {
+        "index": 137,
+        "file": "note_0138.wav"
+      },
+      {
+        "index": 138,
+        "file": "note_0139.wav"
+      },
+      {
+        "index": 139,
+        "file": "note_0140.wav"
+      },
+      {
+        "index": 140,
+        "file": "note_0141.wav"
+      },
+      {
+        "index": 141,
+        "file": "note_0142.wav"
+      },
+      {
+        "index": 142,
+        "file": "note_0143.wav"
+      },
+      {
+        "index": 143,
+        "file": "note_0144.wav"
+      },
+      {
+        "index": 144,
+        "file": "note_0145.wav"
+      },
+      {
+        "index": 145,
+        "file": "note_0146.wav"
+      },
+      {
+        "index": 146,
+        "file": "note_0147.wav"
+      },
+      {
+        "index": 147,
+        "file": "note_0148.wav"
+      },
+      {
+        "index": 148,
+        "file": "note_0149.wav"
+      },
+      {
+        "index": 149,
+        "file": "note_0150.wav"
+      },
+      {
+        "index": 150,
+        "file": "note_0151.wav"
+      },
+      {
+        "index": 151,
+        "file": "note_0152.wav"
+      },
+      {
+        "index": 152,
+        "file": "note_0153.wav"
+      },
+      {
+        "index": 153,
+        "file": "note_0154.wav"
+      },
+      {
+        "index": 154,
+        "file": "note_0155.wav"
+      },
+      {
+        "index": 155,
+        "file": "note_0156.wav"
+      },
+      {
+        "index": 156,
+        "file": "note_0157.wav"
+      },
+      {
+        "index": 157,
+        "file": "note_0158.wav"
+      },
+      {
+        "index": 158,
+        "file": "note_0159.wav"
+      },
+      {
+        "index": 159,
+        "file": "note_0160.wav"
+      },
+      {
+        "index": 160,
+        "file": "note_0161.wav"
+      },
+      {
+        "index": 161,
+        "file": "note_0162.wav"
+      },
+      {
+        "index": 162,
+        "file": "note_0163.wav"
+      },
+      {
+        "index": 163,
+        "file": "note_0164.wav"
+      },
+      {
+        "index": 164,
+        "file": "note_0165.wav"
+      },
+      {
+        "index": 165,
+        "file": "note_0166.wav"
+      },
+      {
+        "index": 166,
+        "file": "note_0167.wav"
+      },
+      {
+        "index": 167,
+        "file": "note_0168.wav"
+      },
+      {
+        "index": 168,
+        "file": "note_0169.wav"
+      },
+      {
+        "index": 169,
+        "file": "note_0170.wav"
+      },
+      {
+        "index": 170,
+        "file": "note_0171.wav"
+      },
+      {
+        "index": 171,
+        "file": "note_0172.wav"
+      },
+      {
+        "index": 172,
+        "file": "note_0173.wav"
+      },
+      {
+        "index": 173,
+        "file": "note_0174.wav"
+      },
+      {
+        "index": 174,
+        "file": "note_0175.wav"
+      },
+      {
+        "index": 175,
+        "file": "note_0176.wav"
+      },
+      {
+        "index": 176,
+        "file": "note_0177.wav"
+      },
+      {
+        "index": 177,
+        "file": "note_0178.wav"
+      },
+      {
+        "index": 178,
+        "file": "note_0179.wav"
+      },
+      {
+        "index": 179,
+        "file": "note_0180.wav"
+      },
+      {
+        "index": 180,
+        "file": "note_0181.wav"
+      },
+      {
+        "index": 181,
+        "file": "note_0182.wav"
+      },
+      {
+        "index": 182,
+        "file": "note_0183.wav"
+      },
+      {
+        "index": 183,
+        "file": "note_0184.wav"
+      },
+      {
+        "index": 184,
+        "file": "note_0185.wav"
+      },
+      {
+        "index": 185,
+        "file": "note_0186.wav"
+      },
+      {
+        "index": 186,
+        "file": "note_0187.wav"
+      },
+      {
+        "index": 187,
+        "file": "note_0188.wav"
+      },
+      {
+        "index": 188,
+        "file": "note_0189.wav"
+      },
+      {
+        "index": 189,
+        "file": "note_0190.wav"
+      },
+      {
+        "index": 190,
+        "file": "note_0191.wav"
+      },
+      {
+        "index": 191,
+        "file": "note_0192.wav"
+      },
+      {
+        "index": 192,
+        "file": "note_0193.wav"
+      },
+      {
+        "index": 193,
+        "file": "note_0194.wav"
+      },
+      {
+        "index": 194,
+        "file": "note_0195.wav"
+      },
+      {
+        "index": 195,
+        "file": "note_0196.wav"
+      },
+      {
+        "index": 196,
+        "file": "note_0197.wav"
+      },
+      {
+        "index": 197,
+        "file": "note_0198.wav"
+      },
+      {
+        "index": 198,
+        "file": "note_0199.wav"
+      },
+      {
+        "index": 199,
+        "file": "note_0200.wav"
+      },
+      {
+        "index": 200,
+        "file": "note_0201.wav"
+      },
+      {
+        "index": 201,
+        "file": "note_0202.wav"
+      },
+      {
+        "index": 202,
+        "file": "note_0203.wav"
+      },
+      {
+        "index": 203,
+        "file": "note_0204.wav"
+      },
+      {
+        "index": 204,
+        "file": "note_0205.wav"
+      },
+      {
+        "index": 205,
+        "file": "note_0206.wav"
+      },
+      {
+        "index": 206,
+        "file": "note_0207.wav"
+      },
+      {
+        "index": 207,
+        "file": "note_0208.wav"
+      },
+      {
+        "index": 208,
+        "file": "note_0209.wav"
+      },
+      {
+        "index": 209,
+        "file": "note_0210.wav"
+      },
+      {
+        "index": 210,
+        "file": "note_0211.wav"
+      },
+      {
+        "index": 211,
+        "file": "note_0212.wav"
+      }
+    ]
+  },
+  "gameplay": {
+    "ball": {
+      "start_position": [
+        540.0,
+        515.0
+      ],
+      "start_velocity": [
+        0.0,
+        600.0
+      ],
+      "start_radius": 24.0,
+      "max_radius": 320.0,
+      "max_radius_ratio": 0.8,
+      "growth_per_hit": 1.025,
+      "speed_growth_per_hit": 1.012,
+      "max_speed": 1600.0
+    },
+    "arena": {
+      "type": "circle",
+      "center": [
+        540,
+        960
+      ],
+      "radius": 470.0,
+      "line_width": 10.0
+    }
+  },
+  "visual": {
+    "background_color": "#050505",
+    "ball_color": "#00ffcc",
+    "use_glow": true,
+    "use_rainbow_trail": true,
+    "trail_mode": "web",
+    "trail_persistence": 1.0,
+    "impact_effect": true,
+    "use_ball_icon": true,
+    "ball_icon_path": "res://assets/icons/Bayern.png",
+    "icon_silhouette_mode": true,
+    "icon_reveal_phase": "final_storm",
+    "icon_rotation_mode": "none"
+  },
+  "text": {
+    "show_text": true,
+    "top_text": "Can you guess this logo?",
+    "bottom_text": "Stay till the end to find out!"
+  },
+  "phases": [
+    {
+      "name": "intro",
+      "start_time": 0.0,
+      "end_time": 5.0,
+      "speed_multiplier": 1.0,
+      "growth_multiplier": 1.0,
+      "trail_multiplier": 1.0
+    },
+    {
+      "name": "build_up",
+      "start_time": 5.0,
+      "end_time": 10.0,
+      "speed_multiplier": 1.2,
+      "growth_multiplier": 1.15,
+      "trail_multiplier": 1.3
+    },
+    {
+      "name": "final_storm",
+      "start_time": 20.0,
+      "end_time": 30.799,
+      "speed_multiplier": 1.6,
+      "growth_multiplier": 1.35,
+      "trail_multiplier": 2.0
+    }
+  ]
+}

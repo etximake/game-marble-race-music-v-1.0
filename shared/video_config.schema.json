@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Music Ball Video Config",
+  "type": "object",
+  "required": [
+    "project_version",
+    "game_mode",
+    "video",
+    "audio",
+    "gameplay",
+    "visual",
+    "text",
+    "phases"
+  ],
+  "properties": {
+    "project_version": {
+      "type": "string"
+    },
+    "game_mode": {
+      "type": "string",
+      "enum": [
+        "circle_bounce",
+        "polygon_bounce"
+      ]
+    },
+    "video": {
+      "type": "object",
+      "required": [
+        "width",
+        "height",
+        "fps",
+        "duration",
+        "output_name"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "output_name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "audio": {
+      "type": "object",
+      "required": [
+        "note_mode",
+        "note_clips_dir",
+        "audio_delay_ms",
+        "loop_notes",
+        "notes"
+      ],
+      "properties": {
+        "note_mode": {
+          "type": "string",
+          "enum": [
+            "next_note_on_trigger"
+          ]
+        },
+        "note_clips_dir": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audio_delay_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loop_notes": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "index",
+              "file"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "gameplay": {
+      "type": "object",
+      "required": [
+        "ball",
+        "arena"
+      ],
+      "properties": {
+        "ball": {
+          "type": "object",
+            "required": [
+              "start_position",
+              "start_velocity",
+              "start_radius",
+              "max_radius",
+              "max_radius_ratio",
+              "growth_per_hit",
+              "speed_growth_per_hit",
+              "max_speed"
+            ],
+          "properties": {
+            "start_position": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "start_velocity": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "start_radius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "max_radius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "max_radius_ratio": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 0.95
+            },
+            "growth_per_hit": {
+              "type": "number",
+              "minimum": 1
+            },
+            "speed_growth_per_hit": {
+              "type": "number",
+              "minimum": 1
+            },
+            "max_speed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "tempo_compensation_min": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1.0
+            }
+          },
+          "additionalProperties": false
+        },
+        "arena": {
+          "type": "object",
+          "required": [
+            "type",
+            "center",
+            "radius",
+            "line_width"
+          ],
+          "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "circle",
+              "square",
+              "pentagon",
+              "hexagon"
+            ]
+          },
+            "center": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+          "radius": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "sides": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 12
+          },
+          "line_width": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "visual": {
+      "type": "object",
+      "required": [
+        "background_color",
+        "ball_color",
+        "use_glow",
+        "use_rainbow_trail",
+        "trail_mode",
+        "trail_persistence",
+        "impact_effect"
+      ],
+      "properties": {
+        "background_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "ball_color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "use_glow": {
+          "type": "boolean"
+        },
+        "use_rainbow_trail": {
+          "type": "boolean"
+        },
+        "trail_mode": {
+          "type": "string",
+          "enum": [
+            "short",
+            "long",
+            "web"
+          ]
+        },
+        "trail_persistence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "impact_effect": {
+          "type": "boolean"
+        },
+        "use_ball_icon": {
+          "type": "boolean"
+        },
+        "ball_icon_path": {
+          "type": "string"
+        },
+        "icon_silhouette_mode": {
+          "type": "boolean"
+        },
+        "icon_reveal_phase": {
+          "type": "string"
+        },
+        "icon_rotation_mode": {
+          "type": "string",
+          "enum": ["none", "velocity", "spin"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "text": {
+      "type": "object",
+      "required": [
+        "show_text",
+        "top_text",
+        "bottom_text"
+      ],
+      "properties": {
+        "show_text": {
+          "type": "boolean"
+        },
+        "top_text": {
+          "type": "string"
+        },
+        "bottom_text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "start_time",
+          "end_time",
+          "speed_multiplier",
+          "growth_multiplier",
+          "trail_multiplier"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_time": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end_time": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "speed_multiplier": {
+            "type": "number",
+            "minimum": 0
+          },
+          "growth_multiplier": {
+            "type": "number",
+            "minimum": 0
+          },
+          "trail_multiplier": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

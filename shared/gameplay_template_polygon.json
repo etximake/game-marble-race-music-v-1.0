@@ -1,0 +1,77 @@
+{
+  "game_mode": "polygon_bounce",
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 60
+  },
+  "gameplay": {
+    "ball": {
+      "start_position": [
+        540.0,
+        515.0
+      ],
+      "start_velocity": [
+        0.0,
+        600.0
+      ],
+      "start_radius": 24.0,
+      "max_radius": 320.0,
+      "max_radius_ratio": 0.55,
+      "growth_per_hit": 1.020,
+      "speed_growth_per_hit": 1.015,
+      "max_speed": 1600.0,
+      "tempo_compensation_min": 0.75
+    },
+    "arena": {
+      "type": "square",
+      "center": [
+        540,
+        960
+      ],
+      "radius": 470.0,
+      "line_width": 8.0,
+      "sides": 4
+    }
+  },
+  "visual": {
+    "background_color": "#050505",
+    "ball_color": "#00ffcc",
+    "use_glow": true,
+    "use_rainbow_trail": true,
+    "trail_mode": "web",
+    "trail_persistence": 1.0,
+    "impact_effect": true,
+    "use_ball_icon": false,
+    "ball_icon_path": "",
+    "icon_silhouette_mode": false,
+    "icon_reveal_phase": "final_storm",
+    "icon_rotation_mode": "none"
+  },
+  "phases": [
+    {
+      "name": "intro",
+      "start_time": 0.0,
+      "end_time": 3.0,
+      "speed_multiplier": 1.0,
+      "growth_multiplier": 1.0,
+      "trail_multiplier": 1.0
+    },
+    {
+      "name": "build_up",
+      "start_time": 3.0,
+      "end_time": 10.0,
+      "speed_multiplier": 2.0,
+      "growth_multiplier": 2.0,
+      "trail_multiplier": 1.5
+    },
+    {
+      "name": "final_storm",
+      "start_time": 10.0,
+      "end_time": 85.0,
+      "speed_multiplier": 3.5,
+      "growth_multiplier": 4.0,
+      "trail_multiplier": 3.0
+    }
+  ]
+}
