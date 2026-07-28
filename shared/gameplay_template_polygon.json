@@ -30,8 +30,14 @@
         960
       ],
       "radius": 470.0,
-      "line_width": 8.0,
+      "line_width": 8,
       "sides": 4
+    },
+    "trajectory": {
+      "mode": "mandala_weaver",
+      "polygon_sides": [10, 8, 6, 5, 4],
+      "flower_offset_degrees": 14.5,
+      "precession_speeds": [0.0, 1.5, 12.0]
     }
   },
   "visual": {
@@ -63,19 +69,22 @@
       "name": "intro",
       "speed_multiplier": 1.0,
       "growth_multiplier": 1.0,
-      "trail_multiplier": 1.0
+      "trail_multiplier": 1.0,
+      "trajectory_control": 0.0
     },
     {
       "name": "build_up",
       "speed_multiplier": 2.0,
       "growth_multiplier": 2.0,
-      "trail_multiplier": 1.5
+      "trail_multiplier": 1.5,
+      "trajectory_control": 0.5
     },
     {
       "name": "final_storm",
       "speed_multiplier": 3.5,
       "growth_multiplier": 4.0,
-      "trail_multiplier": 3.0
+      "trail_multiplier": 3.0,
+      "trajectory_control": 1.0
     }
   ]
 }

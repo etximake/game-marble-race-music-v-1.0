@@ -22,30 +22,29 @@ static func reflect_velocity(velocity: Vector2, normal: Vector2, current_time: f
 	var angle_to_center = reflected.angle_to(to_center) # in radians, between -PI and PI
 	var time_ratio = clampf(current_time / duration, 0.0, 1.0)
 	
-	# For the first few hits, we force a large grazing angle to create a polygon with many sides
-	if hit_count <= 2:
-		var sign_factor = 1.0 if angle_to_center >= 0 else -1.0
-		if abs(angle_to_center) < 0.2:
-			sign_factor = 1.0 if randf() > 0.5 else -1.0
-		var target_angle = (1.25 + deg_to_rad(5.0)) * sign_factor
-		var rotation_needed = target_angle - angle_to_center
-		reflected = reflected.rotated(rotation_needed)
+	var sign_factor = 1.0 if angle_to_center >= 0.0 else -1.0
+	if abs(angle_to_center) < 0.1:
+		sign_factor = 1.0 if randf() > 0.5 else -1.0
+		
+	var target_angle = 0.0
+	if time_ratio < 0.60:
+		var N = 10
+		if time_ratio < 0.12: N = 10
+		elif time_ratio < 0.24: N = 8
+		elif time_ratio < 0.36: N = 6
+		elif time_ratio < 0.48: N = 5
+		else: N = 4
+		target_angle = (PI / 2.0 - PI / float(N)) * sign_factor
+	elif time_ratio < 0.72:
+		target_angle = deg_to_rad(1.5) * sign_factor # Đường thẳng xoay
 	else:
-		# Decay the angle of incidence towards 0 (radial straight line)
-		# Slow decay at the beginning, faster decay at the end of the song
-		var decay_rate = lerpf(0.008, 0.08, time_ratio)
-		reflected = reflected.rotated(angle_to_center * decay_rate)
+		target_angle = deg_to_rad(14.0) * sign_factor # Tạo hình bông hoa
 		
-		# Angular Precession: To prevent the ball from bouncing back and forth on the exact same diameter (horizontal line as in the image),
-		# we apply a continuous rotational shift (precession) that spreads the lines evenly 360 degrees across the circle.
-		# Note: We only apply this shift if the velocity is close to being radial, to avoid distorting the initial polygon phase.
-		if decay_rate > 0.02:
-			var precession_deg = 15.5
-			# Rotate reflected vector based on hit count to rotate the diameter line 360 degrees
-			reflected = reflected.rotated(deg_to_rad(precession_deg * (hit_count % 360)))
-		
+	var rotation_needed = target_angle - angle_to_center
+	reflected = reflected.rotated(rotation_needed)
+	
 	# Add a tiny bit of random jitter so it doesn't look absolutely robotic
-	var jitter = randf_range(-0.01, 0.01)
+	var jitter = randf_range(-0.005, 0.005)
 	return reflected.rotated(jitter)
 
 static func resolve_inside_arena(ball: BallState, arena: ArenaState, normal: Vector2):

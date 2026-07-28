@@ -9,6 +9,7 @@ var ball_view: Node2D
 var trail_mode: String = "web"
 var trail_persistence: float = 1.0
 var use_rainbow: bool = true
+var use_glow: bool = true
 var base_color: Color = Color.WHITE
 var phases: Array = []
 
@@ -25,6 +26,7 @@ func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Diction
 	trail_mode = visual_config.get("trail_mode", "web")
 	trail_persistence = float(visual_config.get("trail_persistence", 1.0))
 	use_rainbow = visual_config.get("use_rainbow_trail", true)
+	use_glow = visual_config.get("use_glow", true)
 	base_color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
 	phases = p_phases
 
@@ -118,6 +120,7 @@ func _draw():
 
 		col.a = age_factor * 1.0
 
-		var outline_col = Color(0.0, 0.0, 0.0, age_factor * 0.9)
+		# Sharp black outline to create 3D layered/ribbed tube effect (Z-overlay overlapping)
+		var outline_col = Color(0.0, 0.0, 0.0, age_factor * 1.0)
 		draw_circle(stamp.position, stamp.radius, outline_col)
-		draw_circle(stamp.position, stamp.radius - 2.0, col)
+		draw_circle(stamp.position, stamp.radius - 2.5, col)

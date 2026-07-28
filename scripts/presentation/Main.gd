@@ -11,6 +11,8 @@ var template_path: String = ""
 var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D
+var active_mode_controller: RefCounted
+var is_started: bool = false
 
 func _ready():
 	error_overlay.visible = false
@@ -20,6 +22,15 @@ func _ready():
 	_parse_arguments()
 	
 	_load_and_start()
+
+func _unhandled_input(event: InputEvent):
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+
+	if event.keycode == KEY_R:
+		get_tree().reload_current_scene()
+	elif event.keycode == KEY_SPACE and not is_started:
+		_start_simulation()
 
 func _parse_arguments():
 	# Allow passing --config, --template and --job_dir from CLI
@@ -77,14 +88,14 @@ func _load_and_start():
 	move_child(active_mode_view, get_node("UIOverlay").get_index())
 	
 	# Create game mode controller
-	var controller = GameModeFactory.create_controller(mode_name, video_config.get_gameplay_config())
-	if not controller:
+	active_mode_controller = GameModeFactory.create_controller(mode_name, video_config.get_gameplay_config())
+	if not active_mode_controller:
 		error_overlay.show_error("InvalidModeGameplay", "Failed to create mode controller for: " + mode_name)
 		return
 		
 	# Setup view
 	if active_mode_view.has_method("setup"):
-		active_mode_view.setup(controller, visual_config, job_folder, video_config.get_phases(), video_config.get_quiz_config())
+		active_mode_view.setup(active_mode_controller, visual_config, job_folder, video_config.get_phases(), video_config.get_quiz_config())
 		
 	# Setup background color
 	var bg_color = Color.from_string(visual_config.get("background_color", "#050505"), Color.BLACK)
@@ -95,8 +106,16 @@ func _load_and_start():
 	sim_controller.note_triggered.connect(_on_note_triggered)
 	sim_controller.simulation_finished.connect(_on_simulation_finished)
 	
-	# Start simulation
-	sim_controller.initialize(video_config, controller)
+	# Wait for Space before starting the simulation. No start prompt is shown in the render.
+
+func _start_simulation():
+	if is_started or not video_config or not active_mode_controller:
+		return
+
+	is_started = true
+	sim_controller.initialize(video_config, active_mode_controller)
+	# AudioNotePlayer will handle subsequent note playback from simulation events.
+	audio_note_player.play_next_note()
 
 func _on_mode_event(event: GameEvent):
 	if active_mode_view and active_mode_view.has_method("handle_mode_event"):
