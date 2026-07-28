@@ -26,6 +26,7 @@ func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "
 	color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
 	use_glow = visual_config.get("use_glow", true)
 	use_rainbow = visual_config.get("use_rainbow_trail", true)
+	z_index = 5
 	
 	use_ball_icon = visual_config.get("use_ball_icon", false)
 	var ball_icon_path = visual_config.get("ball_icon_path", "")
@@ -77,9 +78,18 @@ func _draw():
 
 	var radius = state.radius * pulse_scale
 
-	# 1. Outer sharp black stroke
+	# 1. Outer sharp black stroke to separate the ball from the trail
 	draw_circle(Vector2.ZERO, radius, Color(0.0, 0.0, 0.0, 1.0))
 	
+	# 2. Dynamic Neon glow color synced with rainbow trail
+	var glow_col = color
+	if use_rainbow:
+		var pos_hue = wrapf(state.position.x * 0.0003 + state.position.y * 0.0004, 0.0, 1.0)
+		var dir_hue = wrapf((state.velocity.angle() + PI) / TAU, 0.0, 1.0)
+		var time_hue = wrapf(time_elapsed * 0.06, 0.0, 1.0)
+		var hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)
+		glow_col = Color.from_hsv(hue, 1.0, 1.0)
+
 	if use_ball_icon:
 		var should_reveal = (reveal_time < 0.0) or (time_elapsed >= reveal_time)
 
@@ -93,90 +103,69 @@ func _draw():
 			draw_set_transform(Vector2.ZERO, rotation_angle, Vector2.ONE)
 
 		if not should_reveal:
+			# Deep dark background inside the ball for high contrast with neon rings
+			var bg_color = Color(0.07, 0.07, 0.09)
+			draw_circle(Vector2.ZERO, radius - 2.5, bg_color)
+			
+			# Sleek neon outline rings
+			draw_arc(Vector2.ZERO, radius - 3.5, 0.0, TAU, 96, glow_col, 2.5, true)
+			draw_arc(Vector2.ZERO, radius - 3.5, 0.0, TAU, 96, Color(glow_col.r, glow_col.g, glow_col.b, 0.3), 5.5, true)
+			
 			if icon_silhouette_mode:
-				# Never draw the real logo before reveal. The quiz silhouette is abstract.
-				var silhouette_color = color.darkened(0.55)
-				draw_circle(Vector2.ZERO, radius - 2.5, silhouette_color)
-				draw_arc(Vector2.ZERO, radius - 2.5, 0.0, TAU, 96, color.lightened(0.25), 3.0, true)
-				_draw_quiz_question(radius)
+				_draw_quiz_question(radius, glow_col)
 			else:
-				_draw_question_placeholder(radius, Color.WHITE)
+				_draw_question_placeholder(radius, glow_col)
 		else:
+			# Clean reveal: logo takes up the space with no distracting layers
 			if ball_icon_texture:
 				var size = (radius - 2.5) * 2.0
 				var dest_rect = Rect2(-radius + 2.5, -radius + 2.5, size, size)
 				draw_texture_rect(ball_icon_texture, dest_rect, false)
 			else:
-				_draw_question_placeholder(radius, Color.WHITE)
+				_draw_question_placeholder(radius, glow_col)
+
+			# Elegant glow outline on reveal
+			draw_arc(Vector2.ZERO, radius - 2.5, 0.0, TAU, 96, glow_col, 2.5, true)
 
 		if rotation_angle != 0.0:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-		for i in range(8):
-			var t = float(i + 1) / 8.0
-			var r_level = (radius - 2.5) * (1.0 - t * 0.1)
-			var c_alpha = t * 0.07
-			draw_circle(Vector2.ZERO, r_level, Color(1.0, 1.0, 1.0, c_alpha))
-
-		draw_circle(Vector2.ZERO, radius * 0.52, Color(1.0, 1.0, 1.0, 0.18))
-		draw_circle(Vector2.ZERO, radius * 0.36, Color(1.0, 1.0, 1.0, 0.30))
-		draw_circle(Vector2.ZERO, radius * 0.22, Color(1.0, 1.0, 1.0, 0.65))
 		
 	else:
-		var draw_col = color
-		if use_rainbow:
-			var pos_hue = wrapf(state.position.x * 0.0003 + state.position.y * 0.0004, 0.0, 1.0)
-			var dir_hue = wrapf((state.velocity.angle() + PI) / TAU, 0.0, 1.0)
-			var time_hue = wrapf(time_elapsed * 0.06, 0.0, 1.0)
-			var hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)
-			draw_col = Color.from_hsv(hue, 0.85, 0.9)
-
-		# Keep the configured color as the visual source of truth.
-		var ball_base_col = draw_col
-		draw_circle(Vector2.ZERO, radius - 2.5, ball_base_col)
+		# Generic ball mode (without logo icon)
+		draw_circle(Vector2.ZERO, radius - 2.5, Color(0.07, 0.07, 0.09))
+		draw_arc(Vector2.ZERO, radius - 3.5, 0.0, TAU, 96, glow_col, 3.0, true)
+		draw_arc(Vector2.ZERO, radius - 3.5, 0.0, TAU, 96, Color(glow_col.r, glow_col.g, glow_col.b, 0.35), 6.5, true)
 		
-		# Radial gradient layers fading into bright center
-		for i in range(8):
-			var t = float(i + 1) / 8.0
-			var r_level = (radius - 2.5) * (1.0 - t * 0.1)
-			var c_alpha = t * 0.18
-			draw_circle(Vector2.ZERO, r_level, Color(0.1, 0.9, 0.2, c_alpha))
+		# Saturated core dot
+		draw_circle(Vector2.ZERO, radius * 0.22, Color.WHITE)
+		draw_circle(Vector2.ZERO, radius * 0.22, Color(glow_col.r, glow_col.g, glow_col.b, 0.5))
 
-		# Soft center inner glow ring
-		draw_circle(Vector2.ZERO, radius * 0.52, Color(1.0, 1.0, 1.0, 0.32))
-		draw_circle(Vector2.ZERO, radius * 0.36, Color(1.0, 1.0, 1.0, 0.46))
-		# White highlight center
-		draw_circle(Vector2.ZERO, radius * 0.22, Color(1.0, 1.0, 1.0, 0.98))
-
-func _draw_question_placeholder(radius: float, modulate_color: Color) -> void:
-	var face_color = Color(0.55, 0.27, 0.68) # Beautiful quiz purple #8e44ad
-	var question_color = Color(1.0, 1.0, 1.0) # White
-	
-	if modulate_color == Color(0.0, 0.0, 0.0, 1.0):
-		face_color = Color(0.0, 0.0, 0.0, 1.0)
-		question_color = Color(0.0, 0.0, 0.0, 1.0)
-		
-	draw_circle(Vector2.ZERO, radius - 2.5, face_color)
-	
-	if face_color != Color.BLACK:
-		var font = load("res://assets/fonts/Montserrat-ExtraBold.ttf") as Font
-		if not font:
-			font = ThemeDB.fallback_font
-		if font:
-			var font_size = int(radius * 1.4)
-			var text = "?"
-			var ascent = font.get_ascent(font_size)
-			var descent = font.get_descent(font_size)
-			var pos = Vector2(-radius, (ascent - descent) * 0.5 - radius * 0.05)
-			draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, question_color)
-
-func _draw_quiz_question(radius: float) -> void:
+func _draw_question_placeholder(radius: float, glow_color: Color) -> void:
 	var font = load("res://assets/fonts/Montserrat-ExtraBold.ttf") as Font
 	if not font:
 		font = ThemeDB.fallback_font
 	if font:
-		var font_size = int(radius * 0.72)
+		var font_size = int(radius * 1.3)
+		var text = "?"
 		var ascent = font.get_ascent(font_size)
 		var descent = font.get_descent(font_size)
-		var pos = Vector2(-radius, (ascent - descent) * 0.5 - radius * 0.05)
-		draw_string(font, pos, "?", HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)
+		var pos = Vector2(-radius, (ascent - descent) * 0.5)
+		
+		var shadow_col = Color(glow_color.r, glow_color.g, glow_color.b, 0.4)
+		draw_string(font, pos + Vector2(2, 2), text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, shadow_col)
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)
+
+func _draw_quiz_question(radius: float, glow_color: Color) -> void:
+	var font = load("res://assets/fonts/Montserrat-ExtraBold.ttf") as Font
+	if not font:
+		font = ThemeDB.fallback_font
+	if font:
+		var font_size = int(radius * 1.1)
+		var text = "?"
+		var ascent = font.get_ascent(font_size)
+		var descent = font.get_descent(font_size)
+		var pos = Vector2(-radius, (ascent - descent) * 0.5)
+		
+		var shadow_col = Color(glow_color.r, glow_color.g, glow_color.b, 0.4)
+		draw_string(font, pos + Vector2(1.5, 1.5), text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, shadow_col)
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)

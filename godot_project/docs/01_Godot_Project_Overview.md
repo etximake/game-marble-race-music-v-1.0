@@ -109,11 +109,11 @@ Moi mode co renderer rieng. Trong MVP:
 
 ### UIOverlay
 
-Hien top text va bottom text.
+Hien top text va bottom text. Ngoai ra con hien thi **Countdown Label** (dem nguoc 3-2-1) voi hieu ung neon breathing scale truoc thoi diem quiz reveal, nham kich thich su hao hung cua nguoi xem.
 
 ## Quiz va timeline
 
-`gameplay_config.json` cung cap `quiz` va `timeline`. `ConfigLoader.gd` tinh phase runtime theo `video.duration` cua Job Music JSON, gom intro, build-up, final storm va quiz reveal.
+`ConfigLoader.gd` xay dung 4 phase co dinh tai runtime dua vao `video.duration` cua Job Music JSON: `intro` (0-2s), `build_up` (2-10s), `final_storm` (10s-reveal_time), `climax_storm` (reveal_time-end). `reveal_time` duoc tinh theo cong thuc `max(duration - 8.0, duration * 0.70)`. Cac phase tu gameplay template bi override.
 
 ## Nguyen tac
 

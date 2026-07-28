@@ -27,6 +27,21 @@ current_speed
 ## Update moi frame
 
 ```text
+# Xac dinh ten phase hien tai
+phase_name = phase.get("name", "")
+
+# Neu dang trong climax_storm, vo hieu hoa va cham arena binh thuong,
+# thay vao do ball nay tu do tren toan man hinh
+if phase_name == "climax_storm":
+    # Bat dau tu toc do 600 * speed_multiplier (toi da max_speed * 1.5)
+    # Ban kinh bong phat trien dong: climax_start_radius + time_in_climax * 45 (toi da 300)
+    # Ball troi goc ngau nhien ±10 do/giay de tao hieu ung hon loan
+    # Va cham voi bien man hinh (1080x1920, cach le 10px)
+    # Moi va cham man hinh emit ball_collided + note_triggered
+    # climax_start_radius duoc ghi nhan tai thoi diem chuyen pha de phat trien lien tuc
+    return events
+
+# Normal Play
 # Mo phong trong luc (Gravity Simulation): bay xuong (dir.y > 0) tang toc den +17.5%, bay len (dir.y < 0) giam toc den -15%
 dir = normalize(velocity)
 gravity_effect = 1.0 + (dir.y * 0.175 if dir.y > 0 else dir.y * 0.15)
@@ -135,26 +150,37 @@ Voi `growth_per_hit = 1.025`:
 | intro | 1.0 | 1.0 + 0.025 × 1.0 = 1.025 | +2.5% |
 | build_up | 2.0 | 1.0 + 0.025 × 2.0 = 1.05 | +5.0% |
 | final_storm | 4.0 | 1.0 + 0.025 × 4.0 = 1.10 | +10.0% |
+| climax_storm | 10.0 | 1.0 + 0.025 × 10.0 = 1.25 | +25.0% |
 
-## Phase multiplier va Smooth Interpolation
+## Phase multiplier va Continuous Linear Interpolation
 
-`circle_bounce` lay phase theo current_time:
+`circle_bounce` lay phase theo current_time. ConfigLoader tu dong xay dung 4 phase co dinh tai runtime:
 
 ```text
-intro
-build_up
-final_storm
+intro       (0s den 2s, hoac 20% duration neu video <12s)
+build_up    (2s den 10s, hoac 20%-50% duration neu video <12s)
+final_storm (10s den reveal_time, reveal_time = max(duration - 8.0, duration * 0.70))
+climax_storm (reveal_time den het duration)
 ```
 
-Thay vi thay doi dot ngot theo tung phase, cac gia tri multiplier (speed_multiplier, growth_multiplier, trail_multiplier) se duoc noi suy tuyen tinh va bo tron muot ma (smoothstep lerp) giua gia tri cua phase truoc do va phase hien tai dua vao thoi gian hien tai (`current_time`):
+Thay vi thay doi dot ngot theo tung phase, cac gia tri multiplier (speed_multiplier, growth_multiplier, trail_multiplier) se duoc **noi suy tuyen tinh lien tuc tren toan bo do dai cua phase** hien tai, tu gia tri cua phase truoc do den target cua phase hien tai:
 
 ```text
 t = (time - phase_start) / phase_duration
-smooth_t = t * t * (3.0 - 2.0 * t)
-value = lerp(prev_phase_value, current_phase_value, smooth_t)
+value = lerp(prev_phase_value, current_phase_value, t)
 ```
 
-Final storm nen tang speed/growth/trail manh hon va chuyen tiep muot ma nho co che noi suy nay.
+Cach nay dam bao toc do/kich thuoc tang truong muot ma va lien tuc trong suot toan bo do dai cua phase, khong co hien tuong "dung yen" (plateau) giua phase.
+
+### climax_storm — Che do bay tu do (Free Flight)
+
+Trong giai doan `climax_storm`, bong thoat khoi arena va bay tu do tren toan man hinh:
+
+- **Vo hieu hoa arena collision**: Khong con va cham voi vong tron arena nua.
+- **Va cham bien man hinh**: Bong nay qua lai tren 4 canh cua viewport 1080x1920 (cach le 10px). Moi va cham man hinh deu emit `ball_collided` va `note_triggered`.
+- **Troi goc ngau nhien**: Goc bay cua bong troi tu do ±10 do/giay de tao hieu ung hon loan (chaos flight).
+- **Tang truong ban kinh dong**: `radius = min(climax_start_radius + time_in_climax * 45, 300)`, trong do `climax_start_radius` duoc ghi nhan tai chinh xac thoi diem bat dau phase de dam bao phat trien lien tuc.
+- **Toc do toi da**: `max_speed * 1.5` (cao hon binh thuong).
 
 ## Collision cooldown
 

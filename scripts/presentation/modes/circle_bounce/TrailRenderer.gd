@@ -29,6 +29,7 @@ func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Diction
 	use_glow = visual_config.get("use_glow", true)
 	base_color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
 	phases = p_phases
+	z_index = 4
 
 func handle_collision(_info: CollisionInfo):
 	queue_redraw()
@@ -100,6 +101,10 @@ func _draw():
 		trail_lifetime = 12.0
 	if not phases.is_empty():
 		trail_lifetime *= PhaseRules.get_trail_multiplier(elapsed_time, phases)
+
+	# Determine current phase name
+	var current_phase = PhaseRules.get_current_phase(elapsed_time, phases)
+	var current_phase_name = current_phase.get("name", "")
 
 	for i in range(stamps_count):
 		var stamp = stamps[i]

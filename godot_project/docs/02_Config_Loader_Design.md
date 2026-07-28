@@ -19,7 +19,13 @@ Trach nhiem:
 - Doc va parse file JSON data bai hat (`video_config.json` từ job folder).
 - Doc va parse file gameplay snapshot (`gameplay_config.json` nam canh job config).
 - Gop de (Deep Merge) du lieu job vao ban sao cua template.
-- Tinh phase timeline tu snapshot policy va duration cua job.
+- Tinh quiz reveal_time tu duration bai hat (`reveal_time = max(duration - 8.0, duration * 0.70)`).
+- Xay dung lai danh sach 4 phase co dinh tai runtime (overrides template phases):
+  - `intro`: 0s den 2s (hoac 20% duration neu video <12s)
+  - `build_up`: 2s den 10s (hoac 20%-50% duration neu video <12s)
+  - `final_storm`: 10s den reveal_time
+  - `climax_storm`: reveal_time den het duration
+- Phase duoc xay dung voi `speed_multiplier`, `growth_multiplier`, `trail_multiplier`, `trajectory_control` co dinh phu hop voi Shorts pacing.
 - Kiem tra field bat buoc tren merged config.
 - Tra ve VideoConfig object/dictionary da duoc gop.
 

@@ -67,33 +67,75 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 		var phases = merged_data["phases"] as Array
 		if not phases.is_empty():
 			var duration = float(merged_data.get("video", {}).get("duration", 46.0))
-			var timeline = merged_data.get("timeline", {})
-			if typeof(timeline) != TYPE_DICTIONARY:
-				return {"error": "InvalidTimelineConfig", "message": "Gameplay template timeline must be an object."}
-			if phases.size() == 1:
-				phases[0]["start_time"] = 0.0
-				phases[0]["end_time"] = duration
-			else:
-				if not timeline.has("intro_duration_seconds") or not timeline.has("build_up_end_ratio"):
-					return {"error": "InvalidTimelineConfig", "message": "Timeline must define intro_duration_seconds and build_up_end_ratio."}
-				var intro_duration = minf(float(timeline["intro_duration_seconds"]), duration * 0.1)
-				var build_up_end = duration * clampf(float(timeline["build_up_end_ratio"]), 0.1, 0.95)
-				if intro_duration <= 0.0 or build_up_end <= intro_duration:
-					return {"error": "InvalidTimelineConfig", "message": "Timeline anchors must leave room for intro and build-up."}
-				phases[0]["start_time"] = 0.0
-				phases[0]["end_time"] = intro_duration
-				phases[1]["start_time"] = intro_duration
-				phases[1]["end_time"] = build_up_end
-				for i in range(2, phases.size()):
-					phases[i]["start_time"] = build_up_end
-					phases[i]["end_time"] = duration
-	if merged_data.has("quiz") and typeof(merged_data["quiz"]) == TYPE_DICTIONARY:
-		var quiz = merged_data["quiz"] as Dictionary
-		var quiz_timeline = merged_data.get("timeline", {})
-		if not quiz_timeline.has("reveal_ratio"):
-			return {"error": "InvalidTimelineConfig", "message": "Timeline must define reveal_ratio."}
-		var reveal_ratio = clampf(float(quiz_timeline["reveal_ratio"]), 0.5, 0.99)
-		quiz["reveal_time"] = float(merged_data.get("video", {}).get("duration", 0.0)) * reveal_ratio
+			
+			# Determine reveal time based on quiz reveal ratio, but guarantee at least 6 seconds of climax_storm
+			var reveal_time = duration - 7.0
+			if reveal_time < duration * 0.70:
+				reveal_time = duration * 0.70 # fallback to 30% climax time for extremely short videos
+				
+			if merged_data.has("quiz") and typeof(merged_data["quiz"]) == TYPE_DICTIONARY:
+				var quiz = merged_data["quiz"] as Dictionary
+				quiz["reveal_time"] = reveal_time
+
+			# Re-build phase list to strictly enforce fixed/clamped timings for Shorts pacing:
+			# Phase 0: Intro - 2.0s (or 25% of duration if duration is very short)
+			# Phase 1: Build-up - from 2.0s to 10.0s (or 25%-50% if duration is very short)
+			# Phase 2: Final Storm - from 10.0s to reveal_time
+			# Phase 3: Climax Storm - from reveal_time to duration
+			var intro_end = 2.0
+			var buildup_end = 10.0
+			if duration < 12.0:
+				intro_end = duration * 0.2
+				buildup_end = duration * 0.5
+
+			# Clear existing template phases and dynamically construct our 4-phase sequence
+			var new_phases = []
+			
+			# Phase 1: intro
+			new_phases.append({
+				"name": "intro",
+				"start_time": 0.0,
+				"end_time": intro_end,
+				"speed_multiplier": 1.0,
+				"growth_multiplier": 1.0,
+				"trail_multiplier": 1.5,
+				"trajectory_control": 0.0
+			})
+
+			# Phase 2: build_up
+			new_phases.append({
+				"name": "build_up",
+				"start_time": intro_end,
+				"end_time": buildup_end,
+				"speed_multiplier": 2.0,
+				"growth_multiplier": 2.0,
+				"trail_multiplier": 2.0,
+				"trajectory_control": 0.5
+			})
+
+			# Phase 3: final_storm
+			new_phases.append({
+				"name": "final_storm",
+				"start_time": buildup_end,
+				"end_time": reveal_time,
+				"speed_multiplier": 3.5,
+				"growth_multiplier": 4.0,
+				"trail_multiplier": 3.0,
+				"trajectory_control": 1.0
+			})
+
+			# Phase 4: climax_storm (Storm unleashed on reveal, ball flies free and ultra fast)
+			new_phases.append({
+				"name": "climax_storm",
+				"start_time": reveal_time,
+				"end_time": duration,
+				"speed_multiplier": 10.0,
+				"growth_multiplier": 10.0,
+				"trail_multiplier": 3.5,
+				"trajectory_control": 1.0
+			})
+
+			merged_data["phases"] = new_phases
 	
 	# 5. Validate required top-level fields on the merged config
 	var required_fields = ["game_mode", "video", "audio", "gameplay", "visual", "text", "quiz", "timeline", "phases"]

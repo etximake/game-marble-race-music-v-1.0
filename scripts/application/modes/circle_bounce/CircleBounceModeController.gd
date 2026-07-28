@@ -8,6 +8,7 @@ var state: CircleBounceState
 var gameplay_config: Dictionary = {}
 var cooldown_timer: float = 0.0
 var current_time: float = 0.0
+var climax_start_radius: float = -1.0
 
 func setup(config: Dictionary):
 	gameplay_config = config
@@ -48,7 +49,87 @@ func update_with_phases(delta: float, p_current_time: float, phases: Array, phas
 	if cooldown_timer > 0.0:
 		cooldown_timer -= delta * 1000.0 # Convert to ms
 	
-	# Move the ball
+	# Determine current phase name
+	var phase_name = phase.get("name", "")
+	
+	# If we are in the climax_storm, disable normal arena collision, bounce off screen walls, and add random velocity adjustments
+	if phase_name == "climax_storm":
+		var speed_mult = 1.0
+		var growth_mult = 1.0
+		if not phases.is_empty():
+			speed_mult = PhaseRules.get_speed_multiplier(current_time, phases)
+			growth_mult = PhaseRules.get_growth_multiplier(current_time, phases)
+		else:
+			speed_mult = float(phase.get("speed_multiplier", 6.5))
+			growth_mult = float(phase.get("growth_multiplier", 6.0))
+			
+		# Evolve speed
+		var ball_cfg = gameplay_config.get("ball", {})
+		var max_speed = float(ball_cfg.get("max_speed", 1600.0)) * 1.5 # Allow higher speed in climax
+		state.ball.current_speed = min(600.0 * speed_mult, max_speed)
+		
+		# Slowly grow the ball dynamically over time during climax_storm to paint the screen
+		var start_climax_time = float(phase.get("start_time", 0.0))
+		var time_in_climax = current_time - start_climax_time
+		
+		# Seamless evolution: capture the actual radius right at transition, and expand from there
+		if climax_start_radius < 0.0:
+			climax_start_radius = state.ball.radius
+		state.ball.radius = min(climax_start_radius + (time_in_climax * 45.0), 300.0)
+		
+		# Slowly drift angle for chaos flight effect (between -10 and +10 degrees per second)
+		if state.ball.velocity != Vector2.ZERO:
+			var drift = randf_range(-deg_to_rad(10.0), deg_to_rad(10.0)) * delta
+			state.ball.velocity = state.ball.velocity.rotated(drift).normalized() * state.ball.current_speed
+		else:
+			state.ball.velocity = Vector2.DOWN * state.ball.current_speed
+			
+		# Move the ball
+		CircleBouncePhysics.update_position(state.ball, delta)
+		
+		# Screen boundaries bounce (1080x1920 viewport with 10px safe margin)
+		var margin = 10.0
+		var screen_width = 1080.0
+		var screen_height = 1920.0
+		var collided_screen = false
+		
+		if state.ball.position.x - state.ball.radius < margin:
+			state.ball.position.x = margin + state.ball.radius
+			state.ball.velocity.x = abs(state.ball.velocity.x)
+			collided_screen = true
+		elif state.ball.position.x + state.ball.radius > screen_width - margin:
+			state.ball.position.x = screen_width - margin - state.ball.radius
+			state.ball.velocity.x = -abs(state.ball.velocity.x)
+			collided_screen = true
+			
+		if state.ball.position.y - state.ball.radius < margin:
+			state.ball.position.y = margin + state.ball.radius
+			state.ball.velocity.y = abs(state.ball.velocity.y)
+			collided_screen = true
+		elif state.ball.position.y + state.ball.radius > screen_height - margin:
+			state.ball.position.y = screen_height - margin - state.ball.radius
+			state.ball.velocity.y = -abs(state.ball.velocity.y)
+			collided_screen = true
+			
+		if collided_screen and cooldown_timer <= 0.0:
+			state.hit_count += 1
+			cooldown_timer = COLLISION_COOLDOWN_MS
+			var normal = state.ball.velocity.normalized()
+			var info = CollisionInfo.new(
+				state.ball.position,
+				normal,
+				state.hit_count,
+				current_time,
+				phase_name,
+				state.ball.radius,
+				state.ball.current_speed
+			)
+			events.append(GameEvent.new("ball_collided", current_time, info))
+			events.append(GameEvent.new("note_triggered", current_time, info))
+			
+		return events
+
+	# Move the ball (Normal Play)
 	CircleBouncePhysics.update_position(state.ball, delta)
 	
 	# Check collision

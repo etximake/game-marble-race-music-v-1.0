@@ -117,6 +117,14 @@ func _start_simulation():
 	# AudioNotePlayer will handle subsequent note playback from simulation events.
 	audio_note_player.play_next_note()
 
+func _process(delta: float):
+	if is_started and ui_overlay and video_config and sim_controller:
+		var quiz_cfg = video_config.get_quiz_config()
+		var enabled = quiz_cfg.get("enabled", true)
+		var reveal_t = float(quiz_cfg.get("reveal_time", -1.0))
+		if enabled and reveal_t > 0.0:
+			ui_overlay.update_countdown(sim_controller.current_time, reveal_t)
+
 func _on_mode_event(event: GameEvent):
 	if active_mode_view and active_mode_view.has_method("handle_mode_event"):
 		active_mode_view.handle_mode_event(event)

@@ -22,7 +22,7 @@ CircleBounceView la root view node, quan ly 3 child view:
 
 - Background den.
 - **Arena circle co glow & color cycling & proximity glow & neon pulse**: Ve outline sac net o trung tam kem theo 8 lop glow ngoai ria. Glow tang cuong do (len den 3x) khi ball tien gan bien arena. Neu bat `use_rainbow_trail`, mau cua vong tron arena tu dong thay doi cham theo dai mau cau vong. Moi va cham kich hoat neon pulse toan vong tron kem edge flash tai diem va cham.
-- **Ball co rainbow, glow phan ung toc do, pulse va cham, hieu ung Glass Sphere 3D**: Qua bong duoc render dang khoi thuy tinh Glass Sphere 3D sang trong, vien ngoai den dam, nen xanh la Vibrant Green, 8 lop radial gradient sang dan vao tam, cung voi nhieu lop glow phan ung theo toc do bong va hieu ung pulse phong to 12% khi va cham.
+- **Ball co Neon Glow dong bo Rainbow, Pulse va cham, ngoai hinh toi co dien**: Qua bong duoc render voi nen toi sau tham (dark core `Color(0.07, 0.07, 0.09)`), vien ngoai den dam (`Color.BLACK`), va 2 lop neon outline ruc ro (lop ngoai alpha 0.3, lop trong dam net) co mau sac dong bo hoa voi rainbow trail. Tam bong co them mot diem sang bao hoa (white + glow color overlay). Toan bo mau neon duoc tinh toan dong dua tren vi tri, van toc va thoi gian thuc de tao hieu ung bien ao lien tuc (`hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)`).
 - **Rainbow Stamp Trail co fade thoi gian & gradient theo nhip**: He thong stamp tron chong chen, stamp duoc to mau dua tren chu ky va cham (hit_count) va stamp index de tao cac block mau bao hoa sac net ruc ro. Cac stamp mo dan theo tuoi dua vao elapsed_time, tao hieu ung duoi sao choi.
 - Text hook o tren va duoi.
 
@@ -56,19 +56,18 @@ Cong thuc: `age_factor = clamp(1.0 - (age / trail_lifetime), 0.0, 1.0)`
 
 Chieu rong cua trail stamp duoc dong bo chat che theo su tien hoa ban kinh cua qua bong (`ball.radius`). Moi stamp luu tru ban kinh tai thoi diem duoc tao, khong thay doi theo thoi gian.
 
-## Rainbow color va Glass Sphere 3D
+## Rainbow color va Ball Neon Rendering
 
-### Ball (Glass Sphere 3D Rendering)
-De tao hieu ung 3D thuy tinh (Glass Sphere 3D) ruc ro va chan thuc nhu hinh tham khao, Ball duoc ve bang cach xep chong cac layer tu ngoai vao trong:
-1. **Outer Stroke**: Vong tron vien den hoan toan (`Color(0.0, 0.0, 0.0, 1.0)`) co ban kinh bang radius.
-2. **Base Color**: Vong tron ruot mau xanh la ma sac net (`Color(0.0, 0.75, 0.1)`) co ban kinh `radius - 2.5`.
-3. **Radial Gradient Layers**: Xay dung bang cach lap 8 lan tu trong ra ngoai voi ban kinh giam dan:
-   - `r_level = (radius - 2.5) * (1.0 - t * 0.1)`
-   - `c_alpha = t * 0.18` voi mau sac lam sang trung tam (`Color(0.1, 0.9, 0.2, c_alpha)`).
-4. **Soft Center Inner Glow**: Vong tron phat sang mem o tam voi ban kinh `radius * 0.52` (`Color(0.65, 0.98, 0.55, 0.75)`) va vong thu hai ban kinh `radius * 0.36` (`Color(0.85, 1.0, 0.78, 0.90)`).
-5. **White Highlight Center**: Vong tron trang loi sang choi co ban kinh `radius * 0.22` (`Color(1.0, 1.0, 1.0, 0.98)`).
+### Ball (Neon Dark-Core Rendering)
+Qua bong duoc ve voi phong cach neon-toi (dark aesthetic) de noi bat tren nen den va trail:
+1. **Outer Stroke**: Vong tron vien den hoan toan (`Color(0.0, 0.0, 0.0, 1.0)`) co ban kinh bang radius, phan tach bong voi trail.
+2. **Dark Core Background**: Vong tron nen toi tham (`Color(0.07, 0.07, 0.09)`) co ban kinh `radius - 2.5`.
+3. **Neon Outline Rings (2 lop)**:
+   - Vong trong dam net (`glow_col`, width 2.5) tai `radius - 3.5`.
+   - Vong ngoai mo rong (`Color(glow_col.r, glow_col.g, glow_col.b, 0.3)`, width 5.5) tao anh sang neon toa ra nhe.
+4. **Saturated Core Dot**: Diem sang mau trang choi (`Color.WHITE`) va overlay glow color tai tam bong (`radius * 0.22`).
 
-Neu `use_rainbow_trail = true`, mau cua ball duoc xac dinh boi 3 yeu to vi tri, van toc va thoi gian:
+Mau neon `glow_col` duoc tinh dong tu 3 yeu to vi tri, van toc va thoi gian:
 - `hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)`
 - Trong do `pos_hue = position.x * 0.0003 + position.y * 0.0004`, `dir_hue = (velocity.angle() + PI) / TAU`, va `time_hue = time_elapsed * 0.06`.
 
@@ -76,15 +75,15 @@ Neu `use_rainbow_trail = true`, mau cua ball duoc xac dinh boi 3 yeu to vi tri, 
 Khi dat `use_ball_icon = true`, qua bong se duoc ve bang cach xep chong cac layer sau:
 1. **Outer Stroke**: Vien tron den (`Color(0.0, 0.0, 0.0, 1.0)`) voi ban kinh radius.
 2. **Icon Image / Placeholder**:
-   - Neu co file anh hop le tai `ball_icon_path` (kich thuoc 512x512 px): Ve anh can chinh o giua voi ban kinh giam nhe de nam trong vien den (`dest_rect = Rect2(-radius + 2.5, -radius + 2.5, size, size)`).
-   - Neu file anh chua ton tai/loi: Tu dong ve **Question Mark Placeholder** (`?`) dung font Montserrat-ExtraBold (fallback sang ThemeDB default font) tren nen mau tim quiz `#8e44ad` lam noi bat dau hoi cham vector sac net mau trang.
-3. **Xoay theo dong luc hoc (Rotation Mode)**:
+   - Neu co file anh hop le tai `ball_icon_path` (kich thuoc 512x512 px): Ve anh can chinh o giua voi ban kinh giam nhe de nam trong vien den.
+   - `_draw_question_placeholder(radius, glow_col)` dung font Montserrat-ExtraBold ve dau hoi cham `?` mau neon glow tren nen trong suot.
+3. **Neon Outline**: Neon glow ring (`glow_col`, width 2.5) tai `radius - 2.5` dem lai vien sang quyen ru xung quanh icon.
+4. **Xoay theo dong luc hoc (Rotation Mode)**:
    - `"none"`: Giu nguyen huong thang dung.
    - `"velocity"`: Xoay goc mat cua icon huong theo huong bay cua bong (`state.velocity.angle() + PI/2.0`).
    - `"spin"`: Xoay tron deu tu dong theo thoi gian thuc (`time_elapsed * 3.0`).
-4. **Bong den bi an (Silhouette Mode)**:
-   - Khi `icon_silhouette_mode = true`, icon hoac dau hoi cham placeholder se bi to den toan bo (`Color(0.0, 0.0, 0.0, 1.0)`) cho den khi `time_elapsed` vuot qua thoi gian bat dau cua phase reveal (`icon_reveal_phase`, mac dinh `"final_storm"`). Luc do, màu sac goc cua anh/placeholder se duoc hien thi tro lai.
-5. **Glass Overlay**: Phap dung 8 lop radial gradient mau trang trong suot (`Color(1.0, 1.0, 1.0, alpha)`) kem cac vong tron highlight o tam de tao do cong bong thuy tinh ma khong lam mat di mau sac that cua icon ben duoi.
+5. **Bong den bi an (Silhouette Mode)**:
+   - Khi `icon_silhouette_mode = true`, hien thi dau hoi cham `?` neon glow tren nen den mo ao cho den khi `time_elapsed` vuot qua thoi gian reveal. Sau reveal, icon that hien thi voi mau sac neon glow day du.
 
 ### Arena
 - Rainbow cycle cham theo thoi gian thuc: `hue = wrapf(time_elapsed * 0.05, 0.0, 1.0)`.
@@ -133,7 +132,26 @@ final_storm:
   glow arena manh (proximity glow len 3x)
   ball glow toi da, pulse nhieu
   neon pulse lien tuc
+
+climax_storm:
+  arena fade-out hoan toan trong 0.6s (arena_alpha → 0)
+  ball phat trien han loai (tang truong dong, toi da 300px)
+  ball bay tu do toan man hinh, neon glow manh
+  trail day dac, phu kin man hinh
+  countdown 3-2-1 hien thi truoc reveal voi hieu ung neon + breathing scale
 ```
+
+## Countdown Overlay (UIOverlay)
+
+Khi quiz duoc bat (`enabled = true`) va `reveal_time > 0`, `Main.gd` cap nhat lien tuc countdown thong qua `UIOverlay.update_countdown()`:
+- Hien thi khi thoi gian con lai `<= 3s` va `> 0s`.
+- So dem nguoc: `ceili(time_left)` → 3, 2, 1.
+- Mau neon thay doi theo so: 3 = neon do (`Color(1.0, 0.2, 0.2)`), 2 = vibrant cam (`Color(1.0, 0.6, 0.0)`), 1 = neon xanh la (`Color(0.1, 1.0, 0.1)`).
+- Hieu ung breathing scale: scale tu 1.0 den 1.4 dua tren `fmod(time_left, 1.0)`, tao cam giac "pop" theo nhip giay.
+
+## Arena fade-out trong climax_storm
+
+Trong giai doan `climax_storm`, toan bo arena (ca vong tron chinh, glow, edge flash, neon pulse) tu dong **mo dan va bien mat hoan toan trong 0.6 giay** qua he so `arena_alpha`. ArenaView nhan tham chieu toi controller va danh sach phase de xac dinh thoi diem bat dau fade. Khi `arena_alpha <= 0.001`, arena ngung ve hoan toan.
 
 ## Rui ro
 

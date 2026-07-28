@@ -41,6 +41,21 @@ for i in range(sides):
 ## Update moi frame
 
 ```text
+# Xac dinh ten phase hien tai
+phase_name = phase.get("name", "")
+
+# Neu dang trong climax_storm, vo hieu hoa va cham arena binh thuong,
+# thay vao do ball nay tu do tren toan man hinh
+if phase_name == "climax_storm":
+    # Bat dau tu toc do 600 * speed_multiplier (toi da max_speed * 1.5)
+    # Ban kinh bong phat trien dong: climax_start_radius + time_in_climax * 45 (toi da 300)
+    # Ball troi goc ngau nhien ±10 do/giay de tao hieu ung hon loan
+    # Va cham voi bien man hinh (1080x1920, cach le 10px)
+    # Moi va cham man hinh emit ball_collided + note_triggered
+    # climax_start_radius duoc ghi nhan tai thoi diem chuyen pha de phat trien lien tuc
+    return events
+
+# Normal Play
 # Mo phong trong luc (Gravity Simulation): giong circle_bounce
 dir = normalize(velocity)
 gravity_effect = 1.0 + (dir.y * 0.175 if dir.y > 0 else dir.y * 0.15)
@@ -183,6 +198,10 @@ Arena da giac duoc ve bang `draw_polyline()`:
 3. **Edge flashes**: Ve circle tai diem va cham (giong circle_bounce)
 4. **Neon pulses**: 6 lop polyline mo rong kem sin-smooth fade khi bong cham canh
 5. **Proximity glow**: Tinh khoang cach bong den canh gan nhat de tang cuong do glow
+
+### Arena fade-out trong climax_storm
+
+Trong giai doan `climax_storm`, toan bo arena (ca polygon chinh, glow, edge flash, neon pulse) tu dong **mo dan va bien mat hoan toan trong 0.6 giay** qua he so `arena_alpha`. ArenaView nhan tham chieu toi controller va danh sach phase de xac dinh thoi diem bat dau fade. Khi `arena_alpha <= 0.001`, arena ngung ve hoan toan.
 
 ## File structure
 
