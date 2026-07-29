@@ -37,13 +37,17 @@ class TextSettings:
     show_text: bool
     top_text: str
     bottom_text: str
+    song_name: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "show_text": self.show_text,
             "top_text": self.top_text,
             "bottom_text": self.bottom_text,
         }
+        if self.song_name:
+            result["song_name"] = self.song_name
+        return result
 
 
 @dataclass(frozen=True)

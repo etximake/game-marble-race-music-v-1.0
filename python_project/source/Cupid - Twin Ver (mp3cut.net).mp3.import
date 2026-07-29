@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dmgp205phak8y"
+path="res://.godot/imported/Cupid - Twin Ver (mp3cut.net).mp3-53c9c22fa90f66c3ec1b7f96f26fcfc9.mp3str"
+
+[deps]
+
+source_file="res://python_project/source/Cupid - Twin Ver (mp3cut.net).mp3"
+dest_files=["res://.godot/imported/Cupid - Twin Ver (mp3cut.net).mp3-53c9c22fa90f66c3ec1b7f96f26fcfc9.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

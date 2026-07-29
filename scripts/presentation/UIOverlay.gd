@@ -6,13 +6,24 @@ extends CanvasLayer
 @onready var bottom_label: Label = $Control/BottomLabel
 @onready var countdown_label: Label = $Control/CountdownLabel
 
+var is_showing_answer: bool = false
+var blink_timer: float = 0.0
+
 func setup(text_config: Dictionary):
 	var show_text = text_config.get("show_text", true)
 	visible = show_text
+	is_showing_answer = false
+	blink_timer = 0.0
 	
 	if show_text:
 		top_label.text = text_config.get("top_text", "")
 		bottom_label.text = text_config.get("bottom_text", "")
+		
+		# Reset any override from previous runs
+		top_label.modulate.a = 1.0
+		top_label.add_theme_font_size_override("font_size", 52)
+		top_label.scale = Vector2.ONE
+		bottom_label.visible = bottom_label.text != ""
 		
 		# Set custom fonts or sizes if needed, or stick to defaults
 		top_label.visible = top_label.text != ""
@@ -20,6 +31,32 @@ func setup(text_config: Dictionary):
 		
 	if countdown_label:
 		countdown_label.visible = false
+
+func _process(delta: float):
+	if is_showing_answer and top_label:
+		blink_timer += delta * 6.0
+		var alpha = 0.35 + 0.65 * absf(sin(blink_timer))
+		top_label.modulate.a = alpha
+		# Smoothly pulse scale
+		var scale_val = 1.0 + 0.1 * absf(sin(blink_timer * 0.5))
+		top_label.scale = Vector2(scale_val, scale_val)
+
+func show_answer(song_name: String):
+	if not top_label:
+		return
+	is_showing_answer = true
+	blink_timer = 0.0
+	var answer_text = song_name
+	if answer_text == "":
+		answer_text = "Cupid - Fifty Fifty" # Fallback if empty
+	top_label.text = answer_text
+	top_label.visible = true
+	top_label.add_theme_font_size_override("font_size", 72)
+	# Center pivot for scaling/rotation animation correctly
+	top_label.pivot_offset = top_label.size / 2.0
+	
+	if bottom_label:
+		bottom_label.visible = false # Hide helper text as answer is revealed
 
 func update_countdown(current_time: float, reveal_time: float):
 	if not countdown_label:

@@ -24,6 +24,7 @@ class GenerateVideoConfigUseCase:
             "show_text": True,
             "top_text": "With every bounce, the ball evolves",
             "bottom_text": "Did you recognize the music?",
+            "song_name": "",
         }
         if custom_text:
             text_data.update(custom_text)
@@ -47,6 +48,7 @@ class GenerateVideoConfigUseCase:
                 show_text=bool(text_data["show_text"]),
                 top_text=str(text_data["top_text"]),
                 bottom_text=str(text_data["bottom_text"]),
+                song_name=str(text_data.get("song_name", "")),
             ),
             job_assets=JobAssets(
                 ball_icon_path=str(assets.get("ball_icon_path", "")),

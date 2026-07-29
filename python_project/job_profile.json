@@ -1,8 +1,8 @@
 {
-  "job_id": "job_001",
+  "job_id": "job_002",
   "gameplay_template_path": "../shared/gameplay_template.json",
-  "input_path": "source/DIA DELÍCIA (Slowed) [AsFdNBMCwPM].mp3",
-  "target_duration_seconds": 22.0,
+  "input_path": "source/Cupid - Twin Ver (mp3cut.net).mp3",
+  "target_duration_seconds": 24.0,
   "slice_mode": "fixed_interval",
   "slice_interval_seconds": 0.4,
   "max_note_count": 400,
@@ -10,10 +10,11 @@
   "fade_out_ms": 3,
   "text": {
     "show_text": true,
-    "top_text": "Can you guess this logo?",
-    "bottom_text": "Stay till the end to find out!"
+    "top_text": "Can you guess this name music?",
+    "bottom_text": "Stay till the end to find out!",
+    "song_name": "Cupid - Fifty Fifty"
   },
   "job_assets": {
-    "ball_icon_path": "res://assets/icons/Bayern.png"
+    "ball_icon_path": "res://assets/icons/Cupid.png"
   }
 }

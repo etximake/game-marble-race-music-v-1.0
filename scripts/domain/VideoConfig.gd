@@ -42,6 +42,10 @@ func get_visual_config() -> Dictionary:
 func get_text_config() -> Dictionary:
 	return raw_data.get("text", {})
 
+func get_song_name() -> String:
+	var text_cfg = get_text_config()
+	return text_cfg.get("song_name", "")
+
 func get_quiz_config() -> Dictionary:
 	return raw_data.get("quiz", {})
 

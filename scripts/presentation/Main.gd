@@ -6,7 +6,7 @@ extends Node
 @onready var ui_overlay: UIOverlay = $UIOverlay
 @onready var error_overlay: ErrorOverlay = $ErrorOverlay
 
-var config_path: String = "res://generated/jobs/job_001/video_config.json"
+var config_path: String = "res://generated/jobs/job_002/video_config.json"
 var template_path: String = ""
 var job_folder: String = ""
 var video_config: VideoConfig
@@ -104,6 +104,7 @@ func _load_and_start():
 	# Wire signals
 	sim_controller.mode_event.connect(_on_mode_event)
 	sim_controller.note_triggered.connect(_on_note_triggered)
+	sim_controller.phase_changed.connect(_on_phase_changed)
 	sim_controller.simulation_finished.connect(_on_simulation_finished)
 	
 	# Wait for Space before starting the simulation. No start prompt is shown in the render.
@@ -114,6 +115,7 @@ func _start_simulation():
 
 	is_started = true
 	sim_controller.initialize(video_config, active_mode_controller)
+	audio_note_player.start_source_audio_silent()
 	# AudioNotePlayer will handle subsequent note playback from simulation events.
 	audio_note_player.play_next_note()
 
@@ -124,6 +126,13 @@ func _process(delta: float):
 		var reveal_t = float(quiz_cfg.get("reveal_time", -1.0))
 		if enabled and reveal_t > 0.0:
 			ui_overlay.update_countdown(sim_controller.current_time, reveal_t)
+
+func _on_phase_changed(phase: Dictionary):
+	var phase_name = phase.get("name", "")
+	if phase_name == "climax_storm":
+		var song_name = video_config.get_song_name()
+		ui_overlay.show_answer(song_name)
+		audio_note_player.reveal_source_audio(phase.get("start_time", 0.0))
 
 func _on_mode_event(event: GameEvent):
 	if active_mode_view and active_mode_view.has_method("handle_mode_event"):

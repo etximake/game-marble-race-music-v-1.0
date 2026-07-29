@@ -69,7 +69,7 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 			var duration = float(merged_data.get("video", {}).get("duration", 46.0))
 			
 			# Determine reveal time based on quiz reveal ratio, but guarantee at least 6 seconds of climax_storm
-			var reveal_time = duration - 7.0
+			var reveal_time = duration - 6.0
 			if reveal_time < duration * 0.70:
 				reveal_time = duration * 0.70 # fallback to 30% climax time for extremely short videos
 				

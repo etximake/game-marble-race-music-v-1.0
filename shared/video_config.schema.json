@@ -45,7 +45,8 @@
       "properties": {
         "show_text": {"type": "boolean"},
         "top_text": {"type": "string"},
-        "bottom_text": {"type": "string"}
+        "bottom_text": {"type": "string"},
+        "song_name": {"type": "string"}
       }
     },
     "job_assets": {
