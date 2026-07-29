@@ -115,7 +115,6 @@ func _start_simulation():
 
 	is_started = true
 	sim_controller.initialize(video_config, active_mode_controller)
-	audio_note_player.start_source_audio_silent()
 	# AudioNotePlayer will handle subsequent note playback from simulation events.
 	audio_note_player.play_next_note()
 

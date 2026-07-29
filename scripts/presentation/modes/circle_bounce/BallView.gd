@@ -21,6 +21,19 @@ var reveal_time: float = -1.0
 var phases_list: Array = []
 var is_time_synced_externally: bool = false
 
+const QUIZ_PALETTE: Array = [
+	{ "bg": Color(0.08, 0.02, 0.18), "text": Color(1.0, 0.84, 0.0) },
+	{ "bg": Color(0.02, 0.08, 0.20), "text": Color(0.0, 1.0, 0.85) },
+	{ "bg": Color(0.18, 0.04, 0.04), "text": Color(1.0, 0.3, 0.55) },
+	{ "bg": Color(0.04, 0.15, 0.12), "text": Color(0.4, 1.0, 0.35) },
+	{ "bg": Color(0.15, 0.06, 0.02), "text": Color(1.0, 0.55, 0.1) },
+	{ "bg": Color(0.02, 0.10, 0.18), "text": Color(0.2, 0.75, 1.0) },
+	{ "bg": Color(0.14, 0.02, 0.14), "text": Color(1.0, 0.45, 0.9) },
+	{ "bg": Color(0.03, 0.16, 0.18), "text": Color(0.3, 1.0, 0.95) },
+]
+var quiz_bg_color: Color = Color(0.07, 0.07, 0.09)
+var quiz_text_color: Color = Color.WHITE
+
 func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "", phases: Array = [], quiz_config: Dictionary = {}):
 	state = p_state
 	color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
@@ -52,7 +65,11 @@ func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "
 				var img = Image.load_from_file(resolved_path)
 				if img:
 					ball_icon_texture = ImageTexture.create_from_image(img)
-					
+	
+	var pair = QUIZ_PALETTE[randi() % QUIZ_PALETTE.size()]
+	quiz_bg_color = pair["bg"]
+	quiz_text_color = pair["text"]
+	
 	queue_redraw()
 
 func trigger_pulse():
@@ -103,9 +120,7 @@ func _draw():
 			draw_set_transform(Vector2.ZERO, rotation_angle, Vector2.ONE)
 
 		if not should_reveal:
-			# Deep dark background inside the ball for high contrast with neon rings
-			var bg_color = Color(0.07, 0.07, 0.09)
-			draw_circle(Vector2.ZERO, radius - 2.5, bg_color)
+			draw_circle(Vector2.ZERO, radius - 2.5, quiz_bg_color)
 			
 			# Sleek neon outline rings
 			draw_arc(Vector2.ZERO, radius - 3.5, 0.0, TAU, 96, glow_col, 2.5, true)
@@ -151,9 +166,9 @@ func _draw_question_placeholder(radius: float, glow_color: Color) -> void:
 		var descent = font.get_descent(font_size)
 		var pos = Vector2(-radius, (ascent - descent) * 0.5)
 		
-		var shadow_col = Color(glow_color.r, glow_color.g, glow_color.b, 0.4)
+		var shadow_col = Color(quiz_text_color.r, quiz_text_color.g, quiz_text_color.b, 0.4)
 		draw_string(font, pos + Vector2(2, 2), text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, shadow_col)
-		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, quiz_text_color)
 
 func _draw_quiz_question(radius: float, glow_color: Color) -> void:
 	var font = load("res://assets/fonts/Montserrat-ExtraBold.ttf") as Font
@@ -166,6 +181,6 @@ func _draw_quiz_question(radius: float, glow_color: Color) -> void:
 		var descent = font.get_descent(font_size)
 		var pos = Vector2(-radius, (ascent - descent) * 0.5)
 		
-		var shadow_col = Color(glow_color.r, glow_color.g, glow_color.b, 0.4)
+		var shadow_col = Color(quiz_text_color.r, quiz_text_color.g, quiz_text_color.b, 0.4)
 		draw_string(font, pos + Vector2(1.5, 1.5), text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, shadow_col)
-		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, Color.WHITE)
+		draw_string(font, pos, text, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, quiz_text_color)

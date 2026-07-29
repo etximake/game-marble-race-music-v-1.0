@@ -65,22 +65,12 @@ func setup(audio_config: Dictionary, p_job_folder: String):
 	var source_path = PathResolver.resolve_path(job_folder, "source_audio.wav")
 	if FileAccess.file_exists(source_path):
 		source_audio_stream = NoteClipLoader.load_note_clip(source_path)
-		if source_audio_stream:
-			source_audio_player.stream = source_audio_stream
-			source_audio_player.volume_db = -80.0
 	else:
 		printerr("Source audio not found for playback at reveal: " + source_path)
 		
 	if setup_error != "":
 			return false
 	return true
-
-func start_source_audio_silent():
-	is_playing_source_audio = false
-	if source_audio_player and source_audio_stream:
-		source_audio_player.volume_db = -80.0
-		source_audio_player.play(0.0)
-		print("Started source audio silently at 0.0s")
 
 func play_next_note():
 	if is_playing_source_audio:
@@ -122,12 +112,8 @@ func reveal_source_audio(current_time: float):
 		p.stop()
 		
 	if source_audio_stream and source_audio_player:
-		source_audio_player.volume_db = 0.0 # Unmute
-		print("Revealed source audio (unmuted) at game time: ", current_time)
-		# Safety check: if for some reason the player stopped playing or drifted too much (e.g. > 0.5s), seek to sync
-		if not source_audio_player.playing or absf(source_audio_player.get_playback_position() - current_time) > 0.5:
-			source_audio_player.play(current_time)
-			print("Syncing source audio player to position: ", current_time)
+		source_audio_player.stream = source_audio_stream
+		source_audio_player.play(current_time)
 	else:
 		printerr("Cannot play source audio: stream or player is null")
 
