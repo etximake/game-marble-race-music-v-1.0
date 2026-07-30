@@ -42,9 +42,18 @@ def main():
     custom_job_assets = profile.get("job_assets")
 
     schema_path = os.path.join(project_root, "shared", "video_config.schema.json")
-    gameplay_template_path = profile.get("gameplay_template_path", "../shared/gameplay_template.json")
-    if not os.path.isabs(gameplay_template_path):
-        gameplay_template_path = os.path.normpath(os.path.join(os.path.dirname(profile_path), gameplay_template_path))
+    
+    # Resolve gameplay presets mapping
+    presets_list = profile.get("gameplay_presets", ["circle_bounce", "polygon_bounce"])
+    gameplay_presets_templates = {}
+    for p in presets_list:
+        if p == "polygon_bounce":
+            gameplay_presets_templates[p] = os.path.join(project_root, "shared", "gameplay_template_polygon.json")
+        elif p == "circle_bounce":
+            gameplay_presets_templates[p] = os.path.join(project_root, "shared", "gameplay_template.json")
+        else:
+            gameplay_presets_templates[p] = os.path.join(project_root, "shared", f"gameplay_template_{p}.json")
+        
     base_jobs_dir = os.path.join(project_root, "generated", "jobs")
 
     audio_service = PydubAudioService()
@@ -88,13 +97,13 @@ def main():
             slice_plan=slice_plan,
             custom_text=custom_text,
             custom_job_assets=custom_job_assets,
-            gameplay_template_path=gameplay_template_path,
+            gameplay_presets_templates=gameplay_presets_templates,
         )
 
         print(f"\nJob '{job.job_id}' generated successfully!")
         print(f"Output directory: {job.job_dir}")
         print(f"Config path: {job.video_config_path}")
-        print(f"Gameplay config path: {job.gameplay_config_path}")
+        print(f"Gameplay config paths: {job.gameplay_config_paths}")
         print(f"Clips directory: {job.note_clips_dir}")
         sys.exit(0)
 

@@ -25,6 +25,12 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 	# 2. Load the gameplay snapshot belonging to this job.
 	if template_path == "":
 		template_path = file_path.get_base_dir() + "/gameplay_config.json"
+		if not FileAccess.file_exists(template_path):
+			# Fallback to the new multi-preset layout default (circle_bounce)
+			var alt_path = file_path.get_base_dir() + "/gameplay_configs/circle_bounce/gameplay_config.json"
+			if FileAccess.file_exists(alt_path):
+				template_path = alt_path
+				
 	if not FileAccess.file_exists(template_path):
 		return {"error": "ConfigFileNotFound", "message": "Cannot find gameplay_config.json at: " + template_path}
 		

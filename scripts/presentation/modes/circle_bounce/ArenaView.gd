@@ -36,9 +36,9 @@ func flash_at(flash_position: Vector2, flash_color: Color):
 	})
 
 	line_neon_pulses.append({
-		"color": Color.WHITE,
-		"life": 0.25,
-		"max_life": 0.25
+		"color": flash_color,
+		"life": 0.35,
+		"max_life": 0.35
 	})
 
 func _process(delta: float):
@@ -77,14 +77,13 @@ func _draw():
 			current_phase_name = current_phase.get("name", "")
 			reveal_t = float(current_phase.get("start_time", -1.0)) if current_phase_name == "climax_storm" else -1.0
 
-	# Calculate current flash boost for the line
-	var flash_boost = 0.0
-	if not line_neon_pulses.is_empty():
-		# Get the strongest active pulse
-		for pulse in line_neon_pulses:
-			var alpha = pulse["life"] / pulse["max_life"]
-			var pulse_smooth = sin(alpha * PI)
-			flash_boost = maxf(flash_boost, pulse_smooth * 0.3)
+	var glow_intensity = 1.0
+	if ball_ref and ball_ref.get("state"):
+		var ball_state = ball_ref.state
+		if ball_state:
+			var distance_to_ring = absf(ball_state.position.distance_to(state.center) - state.radius)
+			var proximity = clampf(1.0 - distance_to_ring / (state.radius * 0.15), 0.0, 1.0)
+			glow_intensity = 1.0 + proximity * 2.0
 
 	# Main line color (keeps original behavior: can cycle rainbow color)
 	var draw_col = color
@@ -105,30 +104,62 @@ func _draw():
 		if arena_alpha <= 0.001:
 			return # Do not draw anything if fully faded out
 
-		# Soft semi-transparent white glow around the line
+		# 8-layer proximity-based glow around the line
 		if use_glow:
-			for i in range(4, 0, -1):
+			for i in range(8, 0, -1):
 				var extra_width = float(i) * 2.5
-				# Extremely low alpha white glow that fades out, boosted slightly by collision
-				var glow_alpha = (0.04 * (1.0 - (float(i) / 4.0)) + flash_boost * 0.06) * arena_alpha
+				var glow_alpha = 0.18 * (1.0 - (float(i) / 8.0)) * glow_intensity * arena_alpha
 				draw_arc(
 					state.center,
 					state.radius,
 					0.0,
 					TAU,
 					360,
-					Color(1.0, 1.0, 1.0, glow_alpha),
+					Color(draw_col.r, draw_col.g, draw_col.b, glow_alpha),
 					state.line_width + extra_width,
 					true
 				)
 
-		# Main arena boundary line (fully colored with slight collision flash boost)
+		# Main arena boundary line (fully colored)
 		var main_line_col = Color(draw_col.r, draw_col.g, draw_col.b, arena_alpha)
 		draw_arc(state.center, state.radius, 0.0, TAU, 360, main_line_col, state.line_width, true)
 
-		# White core flash overlay during impact
-		if flash_boost > 0.0:
-			draw_arc(state.center, state.radius, 0.0, TAU, 360, Color(1.0, 1.0, 1.0, flash_boost * arena_alpha), state.line_width - 1.0, true)
+		# Neon pulses layers (6 layers) and core white flash overlay
+		for pulse in line_neon_pulses:
+			var alpha = pulse["life"] / pulse["max_life"]
+			if alpha <= 0.0:
+				continue
+				
+			var col = pulse["color"] as Color
+			var pulse_smooth = sin(alpha * PI)
+			
+			for layer in range(6):
+				var layer_alpha = (1.0 - float(layer) / 6.0) * pulse_smooth * arena_alpha
+				var width = state.line_width + float(layer + 1) * 5.0 * pulse_smooth
+				var neon_col = Color(col.r, col.g, col.b, layer_alpha * 0.5)
+				draw_arc(
+					state.center,
+					state.radius,
+					0.0,
+					TAU,
+					360,
+					neon_col,
+					width,
+					true
+				)
+				
+			var core_alpha = pulse_smooth * pulse_smooth * arena_alpha
+			var bright_col = Color(1.0, 1.0, 1.0, core_alpha * 0.8)
+			draw_arc(
+				state.center,
+				state.radius,
+				0.0,
+				TAU,
+				360,
+				bright_col,
+				state.line_width + 2.0 * pulse_smooth,
+				true
+			)
 
 	# Local colorful impact glow burst at collision point (no solid sharp circle/dot)
 	for flash in edge_flashes:

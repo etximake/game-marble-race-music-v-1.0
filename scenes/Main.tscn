@@ -1,10 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://df4k3u8gexljo"]
+[gd_scene load_steps=6 format=3 uid="uid://df4k3u8gexljo"]
 
-[ext_resource type="Script" path="res://scripts/presentation/Main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scripts/application/SimulationController.gd" id="2_sim"]
-[ext_resource type="PackedScene" path="res://scenes/AudioNotePlayer.tscn" id="3_audio"]
-[ext_resource type="PackedScene" path="res://scenes/UIOverlay.tscn" id="4_ui"]
-[ext_resource type="PackedScene" path="res://scenes/ErrorOverlay.tscn" id="5_error"]
+[ext_resource type="Script" uid="uid://b88sc2jivh51a" path="res://scripts/presentation/Main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c05t3vibvl3t8" path="res://scripts/application/SimulationController.gd" id="2_sim"]
+[ext_resource type="PackedScene" uid="uid://de87uwh3exlj3" path="res://scenes/AudioNotePlayer.tscn" id="3_audio"]
+[ext_resource type="PackedScene" uid="uid://be87uwh3exlj1" path="res://scenes/UIOverlay.tscn" id="4_ui"]
+[ext_resource type="PackedScene" uid="uid://ce87uwh3exlj2" path="res://scenes/ErrorOverlay.tscn" id="5_error"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")

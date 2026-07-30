@@ -1,6 +1,6 @@
 {
   "job_id": "job_002",
-  "gameplay_template_path": "../shared/gameplay_template.json",
+  "gameplay_presets": ["circle_bounce", "polygon_bounce"],
   "input_path": "source/Cupid - Twin Ver (mp3cut.net).mp3",
   "target_duration_seconds": 24.0,
   "slice_mode": "fixed_interval",

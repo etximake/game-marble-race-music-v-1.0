@@ -24,14 +24,12 @@
       "tempo_compensation_min": 0.75
     },
     "arena": {
-      "type": "square",
       "center": [
         540,
         960
       ],
       "radius": 470.0,
-      "line_width": 8,
-      "sides": 4
+      "line_width": 8
     },
     "trajectory": {
       "mode": "mandala_weaver",

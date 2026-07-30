@@ -3,4 +3,5 @@
 /android/
 .env
 .mp4
-/output/godot_renders/.sessions/
+output/godot_renders/.sessions/
+generated

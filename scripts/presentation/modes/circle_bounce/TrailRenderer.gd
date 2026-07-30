@@ -31,7 +31,7 @@ func setup(controller: RefCounted, p_ball_view: Node2D, p_visual_config: Diction
 	phases = p_phases
 	z_index = 4
 
-func handle_collision(_info: CollisionInfo):
+func handle_collision(_info):
 	queue_redraw()
 
 func _process(delta: float):

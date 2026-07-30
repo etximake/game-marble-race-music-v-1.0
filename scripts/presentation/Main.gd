@@ -8,6 +8,7 @@ extends Node
 
 var config_path: String = "res://generated/jobs/job_002/video_config.json"
 var template_path: String = ""
+var selected_mode: String = "circle_bounce"
 var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D
@@ -58,6 +59,9 @@ func _parse_arguments():
 		job_folder = config_path.get_base_dir()
 
 func _load_and_start():
+	if template_path == "":
+		template_path = config_path.get_base_dir().path_join("gameplay_configs").path_join(selected_mode).path_join("gameplay_config.json")
+		
 	var load_result = ConfigLoader.load_config(config_path, template_path)
 	if load_result.has("error"):
 		error_overlay.show_error(load_result["error"], load_result["message"])
@@ -125,7 +129,7 @@ func _load_and_start():
 	sim_controller.simulation_finished.connect(_on_simulation_finished)
 	
 	# Wait for Space before starting the simulation. No start prompt is shown in the render.
-	if DisplayServer.get_name() == "headless":
+	if DisplayServer.get_name() == "headless" or record_requested:
 		get_tree().create_timer(0.1).timeout.connect(
 			func(): _start_simulation(record_requested)
 		)

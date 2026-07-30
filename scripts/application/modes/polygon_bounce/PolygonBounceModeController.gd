@@ -31,8 +31,15 @@ func setup(config: Dictionary):
 	)
 	var arena_radius = float(arena_cfg.get("radius", 470.0))
 	var arena_line_width = float(arena_cfg.get("line_width", 10.0))
-	var arena_type = arena_cfg.get("type", "polygon")
-	var arena_sides = int(arena_cfg.get("sides", 4))
+	
+	# Randomly select sides (4: square, 5: pentagon, 6: hexagon)
+	var sides_options = [4, 5, 6]
+	var arena_sides = sides_options[randi() % sides_options.size()]
+	var arena_type = "square"
+	if arena_sides == 5:
+		arena_type = "pentagon"
+	elif arena_sides == 6:
+		arena_type = "hexagon"
 
 	var ball = BallState.new(ball_pos, ball_vel, ball_radius)
 	var arena = PolygonArenaState.new(arena_type, arena_center, arena_radius, arena_line_width, arena_sides)

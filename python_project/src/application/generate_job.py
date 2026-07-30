@@ -38,7 +38,7 @@ class GenerateJobUseCase:
         slice_plan: SlicePlan,
         custom_text: Optional[Dict[str, Any]] = None,
         custom_job_assets: Optional[Dict[str, Any]] = None,
-        gameplay_template_path: Optional[str] = None,
+        gameplay_presets_templates: Optional[Dict[str, str]] = None,
     ) -> Job:
         if not os.path.exists(source_audio_path):
             raise InputAudioNotFoundError(f"Input audio file not found at: {source_audio_path}")
@@ -47,7 +47,8 @@ class GenerateJobUseCase:
         slice_plan.validate()
 
         # 1. Create Job Structure
-        job = self.job_repository.create_job(job_id)
+        presets = list(gameplay_presets_templates.keys()) if gameplay_presets_templates else ["circle_bounce", "polygon_bounce"]
+        job = self.job_repository.create_job(job_id, presets)
 
         try:
             # 2. Get Audio Metadata
@@ -93,11 +94,13 @@ class GenerateJobUseCase:
             # 7. Save Video Config & Metadata
             self.job_repository.save_video_config(job, video_config)
 
-            if not gameplay_template_path or not os.path.exists(gameplay_template_path):
-                raise JobWriteError(f"Gameplay template not found at: {gameplay_template_path}")
-            with open(gameplay_template_path, "r", encoding="utf-8") as template_file:
-                gameplay_config = json.load(template_file)
-            self.job_repository.save_gameplay_config(job, gameplay_config)
+            if gameplay_presets_templates:
+                for preset, template_path in gameplay_presets_templates.items():
+                    if not os.path.exists(template_path):
+                        raise JobWriteError(f"Gameplay template for '{preset}' not found at: {template_path}")
+                    with open(template_path, "r", encoding="utf-8") as template_file:
+                        gameplay_config = json.load(template_file)
+                    self.job_repository.save_gameplay_config(job, preset, gameplay_config)
             
             job_metadata = {
                 "source_file": source_audio_path,

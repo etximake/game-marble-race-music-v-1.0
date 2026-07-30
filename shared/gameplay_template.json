@@ -24,7 +24,6 @@
       "tempo_compensation_min": 0.75
     },
     "arena": {
-      "type": "circle",
       "center": [
         540,
         960
