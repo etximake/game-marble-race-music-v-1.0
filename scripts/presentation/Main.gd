@@ -13,13 +13,21 @@ var video_config: VideoConfig
 var active_mode_view: Node2D
 var active_mode_controller: RefCounted
 var is_started: bool = false
+var audio_source_player: AudioSourcePlayer
+var audio_coordinator: AudioPlaybackCoordinator
+var recording_coordinator: RecordingCoordinator
+var record_requested: bool = false
 
 func _ready():
 	error_overlay.visible = false
 	ui_overlay.visible = false
 	
+	recording_coordinator = RecordingCoordinator.new()
+	
 	# Parse command line arguments if run externally
 	_parse_arguments()
+	
+	print("Main: DisplayServer name is: ", DisplayServer.get_name())
 	
 	_load_and_start()
 
@@ -27,13 +35,13 @@ func _unhandled_input(event: InputEvent):
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 
-	if event.keycode == KEY_R:
+	if event.keycode == KEY_R and not is_started:
 		get_tree().reload_current_scene()
 	elif event.keycode == KEY_SPACE and not is_started:
-		_start_simulation()
+		_start_simulation(event.ctrl_pressed)
 
 func _parse_arguments():
-	# Allow passing --config, --template and --job_dir from CLI
+	# Allow passing --config, --template, --job_dir and --record from CLI
 	var args = OS.get_cmdline_args()
 	for i in range(args.size()):
 		if args[i] == "--config" and i + 1 < args.size():
@@ -42,6 +50,8 @@ func _parse_arguments():
 			template_path = args[i+1]
 		elif args[i] == "--job_dir" and i + 1 < args.size():
 			job_folder = args[i+1]
+		elif args[i] == "--record":
+			record_requested = true
 			
 	# Always derive the job folder from the config unless explicitly overridden.
 	if job_folder == "":
@@ -61,9 +71,16 @@ func _load_and_start():
 		error_overlay.show_error("UnsupportedGameMode", "The game mode '" + mode_name + "' is not supported.")
 		return
 		
-	# Setup audio player
-	if not audio_note_player.setup(video_config.get_audio_config(), job_folder):
-		error_overlay.show_error("AudioClipMissing", audio_note_player.setup_error)
+	# Setup audio player and coordinator
+	audio_source_player = AudioSourcePlayer.new()
+	add_child(audio_source_player)
+	
+	audio_coordinator = AudioPlaybackCoordinator.new()
+	var quiz_cfg = video_config.get_quiz_config()
+	var reveal_time = float(quiz_cfg.get("reveal_time", -1.0))
+	var audio_setup = audio_coordinator.setup(video_config.get_audio_config(), job_folder, audio_note_player, audio_source_player, reveal_time)
+	if not audio_setup.get("success", false):
+		error_overlay.show_error(audio_setup.get("error", "AudioSetupFailed"), audio_setup.get("message", ""))
 		return
 	
 	# Setup UI Overlay
@@ -108,15 +125,25 @@ func _load_and_start():
 	sim_controller.simulation_finished.connect(_on_simulation_finished)
 	
 	# Wait for Space before starting the simulation. No start prompt is shown in the render.
+	if DisplayServer.get_name() == "headless":
+		get_tree().create_timer(0.1).timeout.connect(
+			func(): _start_simulation(record_requested)
+		)
 
-func _start_simulation():
+func _start_simulation(should_record: bool = false):
 	if is_started or not video_config or not active_mode_controller:
 		return
 
 	is_started = true
-	sim_controller.initialize(video_config, active_mode_controller)
-	# AudioNotePlayer will handle subsequent note playback from simulation events.
-	audio_note_player.play_next_note()
+	
+	if should_record and recording_coordinator:
+		recording_coordinator.start_recording(video_config, job_folder, get_window())
+		if audio_coordinator:
+			audio_coordinator.set_timeline_recorder(recording_coordinator.timeline_recorder)
+			
+	sim_controller.initialize(video_config, active_mode_controller, should_record)
+	if audio_coordinator:
+		audio_coordinator.start_playback()
 
 func _process(delta: float):
 	if is_started and ui_overlay and video_config and sim_controller:
@@ -125,22 +152,33 @@ func _process(delta: float):
 		var reveal_t = float(quiz_cfg.get("reveal_time", -1.0))
 		if enabled and reveal_t > 0.0:
 			ui_overlay.update_countdown(sim_controller.current_time, reveal_t)
+			
+	if recording_coordinator and recording_coordinator.is_recording() and sim_controller:
+		recording_coordinator.capture_frame(get_viewport(), sim_controller.current_time)
 
 func _on_phase_changed(phase: Dictionary):
 	var phase_name = phase.get("name", "")
 	if phase_name == "climax_storm":
 		var song_name = video_config.get_song_name()
 		ui_overlay.show_answer(song_name)
-		audio_note_player.reveal_source_audio(phase.get("start_time", 0.0))
+	
+	if audio_coordinator:
+		audio_coordinator.handle_phase_changed(phase, sim_controller.current_time)
 
 func _on_mode_event(event: GameEvent):
 	if active_mode_view and active_mode_view.has_method("handle_mode_event"):
 		active_mode_view.handle_mode_event(event)
 
 func _on_note_triggered(trigger: NoteTrigger):
-	# AudioNotePlayer will handle the note playback
-	audio_note_player.play_next_note()
+	if audio_coordinator:
+		audio_coordinator.play_next_note(Time.get_ticks_msec(), trigger.time)
 
 func _on_simulation_finished():
 	print("Simulation finished successfully.")
+	if recording_coordinator and recording_coordinator.is_recording():
+		var repo = audio_coordinator.repository if audio_coordinator else null
+		recording_coordinator.stop_recording(repo)
+		
+	if audio_coordinator:
+		audio_coordinator.stop_all()
 	get_tree().quit()

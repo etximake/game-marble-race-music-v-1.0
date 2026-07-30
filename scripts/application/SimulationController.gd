@@ -13,13 +13,15 @@ var current_time: float = 0.0
 var active_mode_controller: RefCounted
 var last_phase_name: String = ""
 var is_running: bool = false
+var force_fixed_delta: bool = false
 
-func initialize(video_config: VideoConfig, controller: RefCounted):
+func initialize(video_config: VideoConfig, controller: RefCounted, p_force_fixed_delta: bool = false):
 	config = video_config
 	active_mode_controller = controller
 	current_time = 0.0
 	last_phase_name = ""
 	is_running = true
+	force_fixed_delta = p_force_fixed_delta
 
 func _process(delta: float):
 	if not is_running:
@@ -27,7 +29,7 @@ func _process(delta: float):
 	
 	# Constant delta matching fps configuration for offline render stability
 	var sim_delta = delta
-	if ProjectSettings.get_setting("rendering/renderer/movie_writer/enabled", false) or Engine.is_editor_hint():
+	if force_fixed_delta or ProjectSettings.get_setting("rendering/renderer/movie_writer/enabled", false) or Engine.is_editor_hint():
 		sim_delta = 1.0 / float(config.get_video_fps())
 	
 	current_time += sim_delta
