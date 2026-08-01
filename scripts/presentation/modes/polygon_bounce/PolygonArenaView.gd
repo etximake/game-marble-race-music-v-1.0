@@ -13,6 +13,7 @@ var phases: Array = []
 
 var edge_flashes: Array[Dictionary] = []
 var line_neon_pulses: Array[Dictionary] = []
+var sparks: Array[Dictionary] = []
 
 func setup(p_state: PolygonArenaState, visual_config: Dictionary, p_controller: RefCounted = null, p_phases: Array = []):
 	state = p_state
@@ -27,7 +28,7 @@ func setup(p_state: PolygonArenaState, visual_config: Dictionary, p_controller: 
 func set_ball_reference(p_ball: Node2D):
 	ball_ref = p_ball
 
-func flash_at(flash_position: Vector2, flash_color: Color):
+func flash_at(flash_position: Vector2, flash_color: Color, normal: Vector2 = Vector2.ZERO, phase_name: String = ""):
 	edge_flashes.append({
 		"position": flash_position,
 		"color": flash_color,
@@ -40,6 +41,43 @@ func flash_at(flash_position: Vector2, flash_color: Color):
 		"life": 0.35,
 		"max_life": 0.35
 	})
+
+	# Generate neon collision sparks
+	if normal != Vector2.ZERO:
+		var spark_count = 8
+		var speed_min = 150.0
+		var speed_max = 300.0
+		var lifetime = 0.3
+		
+		# Pacing adjustments: sparks scale up as music progresses (intro: small/few, climax: big/lots)
+		if phase_name == "intro":
+			spark_count = 4
+			speed_min = 100.0
+			speed_max = 200.0
+			lifetime = 0.2
+		elif phase_name == "build_up":
+			spark_count = 8
+			speed_min = 180.0
+			speed_max = 320.0
+			lifetime = 0.3
+		elif phase_name == "final_storm" or phase_name == "climax_storm":
+			spark_count = 18
+			speed_min = 300.0
+			speed_max = 600.0
+			lifetime = 0.45
+			
+		var bounce_dir = -normal # normal points outwards, so bounce points inwards
+		for i in range(spark_count):
+			# Add random angle deviation to sparks (+/- 45 degrees)
+			var angle_dev = randf_range(-PI / 4.0, PI / 4.0)
+			var spark_velocity = bounce_dir.rotated(angle_dev) * randf_range(speed_min, speed_max)
+			sparks.append({
+				"position": flash_position,
+				"velocity": spark_velocity,
+				"color": flash_color,
+				"life": lifetime,
+				"max_life": lifetime
+			})
 
 func _process(delta: float):
 	if use_rainbow:
@@ -60,6 +98,17 @@ func _process(delta: float):
 		if pulse["life"] <= 0.0:
 			line_neon_pulses.remove_at(j)
 		j -= 1
+
+	var k = sparks.size() - 1
+	while k >= 0:
+		var spark = sparks[k]
+		spark["life"] -= delta
+		if spark["life"] <= 0.0:
+			sparks.remove_at(k)
+		else:
+			spark["position"] += spark["velocity"] * delta
+			spark["velocity"] *= 0.95
+		k -= 1
 
 	queue_redraw()
 
@@ -131,6 +180,23 @@ func _draw():
 
 			var glow_col = Color(col.r, col.g, col.b, alpha * 0.3 * arena_alpha)
 			draw_circle(flash["position"], flash_radius + 4.0, glow_col)
+
+	# Draw sparks
+	for spark in sparks:
+		var alpha = spark["life"] / spark["max_life"]
+		if alpha > 0.0:
+			var col = spark["color"] as Color
+			col.a = alpha * arena_alpha
+			
+			var vel = spark["velocity"] as Vector2
+			var length = clampf(vel.length() * 0.08, 4.0, 32.0)
+			var endpoint = spark["position"] - vel.normalized() * length
+			
+			# Glow line
+			draw_line(spark["position"], endpoint, Color(col.r, col.g, col.b, alpha * 0.3 * arena_alpha), 6.0, true)
+			# Core bright line
+			draw_line(spark["position"], endpoint, Color(1.0, 1.0, 1.0, alpha * 0.9 * arena_alpha), 2.0, true)
+
 
 	for pulse in line_neon_pulses:
 		var alpha = pulse["life"] / pulse["max_life"]

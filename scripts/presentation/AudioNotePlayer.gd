@@ -17,7 +17,15 @@ func setup_pool(pool_size: int) -> void:
 	for i in range(pool_size):
 		var p = AudioStreamPlayer.new()
 		add_child(p)
+		p.bus = &"MuffledBus" # Route notes through the MuffledBus with LowPassFilter
 		players.append(p)
+
+func set_filter_cutoff(cutoff_hz: float) -> void:
+	var bus_idx = AudioServer.get_bus_index("MuffledBus")
+	if bus_idx != -1:
+		var effect = AudioServer.get_bus_effect(bus_idx, 0) as AudioEffectLowPassFilter
+		if effect:
+			effect.cutoff_hz = clampf(cutoff_hz, 10.0, 20500.0)
 
 func play_stream(stream: AudioStream, delay_seconds: float = 0.0) -> void:
 	if not stream:

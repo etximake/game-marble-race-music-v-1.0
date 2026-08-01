@@ -97,6 +97,33 @@ func play_next_note(current_time_ms: float, sim_time: float = 0.0) -> void:
 		if timeline_recorder:
 			timeline_recorder.record_note(note_file, sim_time)
 
+func update_audio_filters(current_time: float, phases: Array) -> void:
+	if not note_player or not session:
+		return
+		
+	# Find current phase name and calculate filter cutoff
+	var phase = PhaseRules.get_current_phase(current_time, phases)
+	var phase_name = phase.get("name", "")
+	
+	if phase_name == "intro" or phase_name == "build_up":
+		# Maintain muffled but clean sound (1500Hz: keeping details/tempo clear but avoiding high frequencies that make it too obvious)
+		note_player.set_filter_cutoff(1500.0)
+	elif phase_name == "final_storm":
+		# Slowly open the filter to reveal the clear, satisfying neon audio climax
+		# Interpolate cutoff_hz from 1500.0 Hz to 20000.0 Hz (fully open) during final_storm phase
+		var start = float(phase.get("start_time", 0.0))
+		var end = float(phase.get("end_time", 0.0))
+		var phase_dur = end - start
+		if phase_dur > 0.0:
+			var t = clampf((current_time - start) / phase_dur, 0.0, 1.0)
+			var cutoff = lerpf(1500.0, 20000.0, t)
+			note_player.set_filter_cutoff(cutoff)
+		else:
+			note_player.set_filter_cutoff(20000.0)
+	else:
+		# fully open for climax_storm
+		note_player.set_filter_cutoff(20000.0)
+
 func handle_phase_changed(phase: Dictionary, current_time: float) -> void:
 	if not session or not source_player:
 		return

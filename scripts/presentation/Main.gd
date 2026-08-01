@@ -157,6 +157,9 @@ func _process(delta: float):
 		if enabled and reveal_t > 0.0:
 			ui_overlay.update_countdown(sim_controller.current_time, reveal_t)
 			
+	if is_started and audio_coordinator and video_config and sim_controller:
+		audio_coordinator.update_audio_filters(sim_controller.current_time, video_config.get_phases())
+			
 	if recording_coordinator and recording_coordinator.is_recording() and sim_controller:
 		recording_coordinator.capture_frame(get_viewport(), sim_controller.current_time)
 

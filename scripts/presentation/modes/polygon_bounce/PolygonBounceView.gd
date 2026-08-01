@@ -34,5 +34,11 @@ func handle_mode_event(event: GameEvent):
 				var hue = wrapf(float(info.hit_count) * 0.02, 0.0, 1.0)
 				ring_color = Color.from_hsv(hue, 0.9, 0.9)
 
-			arena_view.flash_at(info.position, ring_color)
-			ball_view.trigger_pulse()
+			var current_phase_name = info.phase_name if "phase_name" in info else ""
+			if current_phase_name == "" and controller:
+				var current_phase = PhaseRules.get_current_phase(controller.current_time, controller.config.get_phases() if "config" in controller else [])
+				current_phase_name = current_phase.get("name", "")
+
+			# Pass normal vector and phase name to create sparks and dynamic squish
+			arena_view.flash_at(info.position, ring_color, info.normal, current_phase_name)
+			ball_view.trigger_pulse(current_phase_name)

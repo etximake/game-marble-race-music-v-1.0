@@ -72,8 +72,17 @@ func setup(p_state: BallState, visual_config: Dictionary, job_folder: String = "
 	
 	queue_redraw()
 
-func trigger_pulse():
-	pulse_scale = 1.12
+func trigger_pulse(phase_name: String = ""):
+	# Co giãn theo phase để tăng độ thỏa mãn thị giác (intro: 1.06, build_up: 1.12, final_storm/climax: 1.25)
+	var max_pulse = 1.12
+	if phase_name == "intro":
+		max_pulse = 1.06
+	elif phase_name == "build_up":
+		max_pulse = 1.12
+	elif phase_name == "final_storm" or phase_name == "climax_storm":
+		max_pulse = 1.25
+		
+	pulse_scale = max_pulse
 	pulse_timer = 0.15
 
 func _process(delta: float):
