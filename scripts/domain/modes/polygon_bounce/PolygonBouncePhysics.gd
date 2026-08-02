@@ -35,8 +35,8 @@ static func check_polygon_collision(ball: BallState, arena: PolygonArenaState) -
 
 			var edge = b - a
 			var edge_normal = Vector2(-edge.y, edge.x).normalized()
-			var to_ball = ball.position - cp
-			if to_ball.dot(edge_normal) < 0.0:
+			var to_center = arena.center - cp
+			if edge_normal.dot(to_center) < 0.0:
 				edge_normal = -edge_normal
 			closest_normal = edge_normal.normalized()
 			edge_index = i
@@ -74,8 +74,9 @@ static func reflect_velocity(velocity: Vector2, normal: Vector2, current_time: f
 	var jitter = randf_range(-0.01, 0.01)
 	return reflected.rotated(jitter)
 
-static func resolve_inside_arena(ball: BallState, normal: Vector2, penetration: float):
-	ball.position += normal * (penetration + SMALL_MARGIN)
+static func resolve_inside_arena(ball: BallState, arena_center: Vector2, penetration: float):
+	var to_center = (arena_center - ball.position).normalized()
+	ball.position += to_center * (penetration + SMALL_MARGIN)
 
 static func apply_evolution(ball: BallState, gameplay_config: Dictionary, growth_mult: float, speed_mult: float):
 	var ball_cfg = gameplay_config.get("ball", {})

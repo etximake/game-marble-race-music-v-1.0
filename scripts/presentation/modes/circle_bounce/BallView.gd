@@ -110,10 +110,7 @@ func _draw():
 	# 2. Dynamic Neon glow color synced with rainbow trail
 	var glow_col = color
 	if use_rainbow:
-		var pos_hue = wrapf(state.position.x * 0.0003 + state.position.y * 0.0004, 0.0, 1.0)
-		var dir_hue = wrapf((state.velocity.angle() + PI) / TAU, 0.0, 1.0)
-		var time_hue = wrapf(time_elapsed * 0.06, 0.0, 1.0)
-		var hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)
+		var hue = wrapf(time_elapsed * 0.25, 0.0, 1.0)
 		glow_col = Color.from_hsv(hue, 1.0, 1.0)
 
 	if use_ball_icon:

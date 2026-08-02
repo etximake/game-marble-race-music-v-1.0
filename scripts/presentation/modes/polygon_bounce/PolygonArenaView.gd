@@ -14,6 +14,7 @@ var phases: Array = []
 var edge_flashes: Array[Dictionary] = []
 var line_neon_pulses: Array[Dictionary] = []
 var sparks: Array[Dictionary] = []
+var shockwave_rings: Array[Dictionary] = []
 
 func setup(p_state: PolygonArenaState, visual_config: Dictionary, p_controller: RefCounted = null, p_phases: Array = []):
 	state = p_state
@@ -79,6 +80,29 @@ func flash_at(flash_position: Vector2, flash_color: Color, normal: Vector2 = Vec
 				"max_life": lifetime
 			})
 
+	# Spawn shockwave rings expanding outward from the polygon
+	var ring_count = 4
+	var ring_max_scale = 1.5
+	if phase_name == "intro":
+		ring_count = 3
+		ring_max_scale = 1.3
+	elif phase_name == "build_up":
+		ring_count = 4
+		ring_max_scale = 1.5
+	elif phase_name == "final_storm" or phase_name == "climax_storm":
+		ring_count = 5
+		ring_max_scale = 1.8
+
+	for r in range(ring_count):
+		shockwave_rings.append({
+			"delay": float(r) * 0.07,
+			"life": 0.5,
+			"max_life": 0.5,
+			"scale": 1.0,
+			"max_scale": ring_max_scale,
+			"color": flash_color
+		})
+
 func _process(delta: float):
 	if use_rainbow:
 		time_elapsed += delta
@@ -109,6 +133,20 @@ func _process(delta: float):
 			spark["position"] += spark["velocity"] * delta
 			spark["velocity"] *= 0.95
 		k -= 1
+
+	var s = shockwave_rings.size() - 1
+	while s >= 0:
+		var ring = shockwave_rings[s]
+		if ring["delay"] > 0.0:
+			ring["delay"] -= delta
+		else:
+			ring["life"] -= delta
+			if ring["life"] <= 0.0:
+				shockwave_rings.remove_at(s)
+			else:
+				var progress = 1.0 - (ring["life"] / ring["max_life"])
+				ring["scale"] = lerpf(1.0, ring["max_scale"], progress)
+		s -= 1
 
 	queue_redraw()
 
@@ -169,6 +207,19 @@ func _draw():
 			)
 
 	draw_polyline(PackedVector2Array(closed_verts), Color(draw_col.r, draw_col.g, draw_col.b, arena_alpha), state.line_width, true)
+
+	for ring in shockwave_rings:
+		var alpha = ring["life"] / ring["max_life"]
+		if alpha <= 0.0 or ring["delay"] > 0.0:
+			continue
+		var col = ring["color"] as Color
+		var ring_alpha = alpha * 0.55 * arena_alpha
+		var scaled_verts = PackedVector2Array()
+		for v in verts:
+			scaled_verts.append(state.center + (v - state.center) * ring["scale"])
+		var closed_scaled = scaled_verts.duplicate()
+		closed_scaled.append(scaled_verts[0])
+		draw_polyline(closed_scaled, Color(col.r, col.g, col.b, ring_alpha), state.line_width + 4.0 * alpha, true)
 
 	for flash in edge_flashes:
 		var alpha = flash["life"] / flash["max_life"]

@@ -8,7 +8,7 @@ extends Node
 
 var config_path: String = "res://generated/jobs/job_002/video_config.json"
 var template_path: String = ""
-var selected_mode: String = "circle_bounce"
+var selected_mode: String = "polygon_bounce"
 var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D
@@ -20,6 +20,7 @@ var recording_coordinator: RecordingCoordinator
 var record_requested: bool = false
 
 func _ready():
+	randomize()
 	error_overlay.visible = false
 	ui_overlay.visible = false
 	
@@ -32,11 +33,11 @@ func _ready():
 	
 	_load_and_start()
 
-func _unhandled_input(event: InputEvent):
+func _input(event: InputEvent):
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
 
-	if event.keycode == KEY_R and not is_started:
+	if event.keycode == KEY_R:
 		get_tree().reload_current_scene()
 	elif event.keycode == KEY_SPACE and not is_started:
 		_start_simulation(event.ctrl_pressed)

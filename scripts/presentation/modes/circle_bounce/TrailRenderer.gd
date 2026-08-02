@@ -119,8 +119,8 @@ func _draw():
 
 		var col = base_color
 		if use_rainbow:
-			# Change color based on bounce/stroke segment or stamp index for vivid saturated blocks
-			var hue = wrapf(float(stamp.get("hit_count", 0)) * 0.08 + (float(i) * 0.0005), 0.0, 1.0)
+			var phase = float(i) / max(float(stamps_count), 1.0)
+			var hue = wrapf(phase + elapsed_time * 0.25, 0.0, 1.0)
 			col = Color.from_hsv(hue, 1.0, 1.0)
 
 		col.a = age_factor * 1.0

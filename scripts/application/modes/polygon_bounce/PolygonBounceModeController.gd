@@ -171,7 +171,7 @@ func update_with_phases(delta: float, p_current_time: float, phases: Array, phas
 			var compensation = clampf(cos_theta, min_comp, 1.0)
 			state.ball.velocity = reflected_vel.normalized() * (state.ball.current_speed * compensation)
 
-			PolygonBouncePhysics.resolve_inside_arena(state.ball, normal, penetration)
+			PolygonBouncePhysics.resolve_inside_arena(state.ball, state.arena.center, penetration)
 
 			cooldown_timer = COLLISION_COOLDOWN_MS
 
@@ -193,6 +193,6 @@ func update_with_phases(delta: float, p_current_time: float, phases: Array, phas
 		else:
 			var normal = col_result["normal"] as Vector2
 			var penetration = col_result["penetration"] as float
-			PolygonBouncePhysics.resolve_inside_arena(state.ball, normal, penetration)
+			PolygonBouncePhysics.resolve_inside_arena(state.ball, state.arena.center, penetration)
 
 	return events

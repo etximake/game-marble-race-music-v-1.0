@@ -64,3 +64,4 @@ User chon video_config.json
 - `docs/05_Trail_And_Visual_System.md`: thiet ke visual/trail/impact.
 - `docs/06_Render_Output_Guide.md`: quy tac render output.
 - `docs/07_Clean_Architecture.md`: kien truc code, layer, signal, clean code va test checklist.
+- `docs/10_YouTube_Shorts_CTR_Optimization.md`: huong dan dat tieu de video Shorts toi uu CTR cho kenh moi.
