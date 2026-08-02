@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bfe25y6b52nex"
+path="res://.godot/imported/If You're Happy and You Know It.mp3-165df4886e74df55eadd6dc703cd7c3a.mp3str"
+
+[deps]
+
+source_file="res://python_project/source/If You're Happy and You Know It.mp3"
+dest_files=["res://.godot/imported/If You're Happy and You Know It.mp3-165df4886e74df55eadd6dc703cd7c3a.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
