@@ -65,7 +65,7 @@ check polygon collision with arena
 if valid collision:
   apply evolution
   reflect velocity (kem tempo compensation)
-  resolve inside arena (push doc theo edge normal)
+  resolve inside arena (push ve tam arena_center)
   emit ball_collided event
   emit note_triggered event
 ```
@@ -93,8 +93,9 @@ duyet tung canh cua da giac:
 
 neu dist <= ball.radius -> collision
 
-normal = normalize(ball.position - cp)
-neu normal.dot(edge_normal) < 0: normal = -normal
+edge_normal = normalize(Vector2(-edge.y, edge.x))
+neu edge_normal.dot(arena.center - cp) < 0: edge_normal = -edge_normal
+normal = edge_normal
 ```
 
 ### Edge normal
@@ -139,10 +140,11 @@ Normal la **edge normal** (huong vao trong da giac) thay vi **radial normal** (h
 
 ## Resolve inside arena
 
-Sau collision, day ball doc theo normal de tranh stuck:
+Sau collision, day ball huong ve tam arena (arena_center) de tranh stuck:
 
 ```text
-position += normal * (penetration + SMALL_MARGIN)
+to_center = normalize(arena_center - ball.position)
+position += to_center * (penetration + SMALL_MARGIN)
 ```
 
 Voi `penetration = ball.radius - closest_dist`.
@@ -198,6 +200,8 @@ Arena da giac duoc ve bang `draw_polyline()`:
 3. **Edge flashes**: Ve circle tai diem va cham (giong circle_bounce)
 4. **Neon pulses**: 6 lop polyline mo rong kem sin-smooth fade khi bong cham canh
 5. **Proximity glow**: Tinh khoang cach bong den canh gan nhat de tang cuong do glow
+6. **Collision sparks**: Cac tia lua neon ban ra tu diem va cham (so luong va toc do tang theo phase)
+7. **Shockwave rings**: Cac vong song xung kich da giac gian no tu arena ra ngoai (3-5 vong, max scale 1.3-1.8 tuy phase), moi vong cach nhau 0.07s, ton tai 0.5s
 
 ### Arena fade-out trong climax_storm
 

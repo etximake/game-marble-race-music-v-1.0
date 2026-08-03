@@ -22,7 +22,7 @@ CircleBounceView la root view node, quan ly 3 child view:
 
 - Background den.
 - **Arena circle co glow & color cycling & proximity glow & neon pulse**: Ve outline sac net o trung tam kem theo 8 lop glow ngoai ria. Glow tang cuong do (len den 3x) khi ball tien gan bien arena. Neu bat `use_rainbow_trail`, mau cua vong tron arena tu dong thay doi cham theo dai mau cau vong. Moi va cham kich hoat neon pulse toan vong tron kem edge flash tai diem va cham.
-- **Ball co Neon Glow dong bo Rainbow, Pulse va cham, ngoai hinh toi co dien**: Qua bong duoc render voi nen toi sau tham (dark core `Color(0.07, 0.07, 0.09)`), vien ngoai den dam (`Color.BLACK`), va 2 lop neon outline ruc ro (lop ngoai alpha 0.3, lop trong dam net) co mau sac dong bo hoa voi rainbow trail. Tam bong co them mot diem sang bao hoa (white + glow color overlay). Toan bo mau neon duoc tinh toan dong dua tren vi tri, van toc va thoi gian thuc de tao hieu ung bien ao lien tuc (`hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)`).
+- **Ball co Neon Glow dong bo Rainbow, Pulse va cham, ngoai hinh toi co dien**: Qua bong duoc render voi nen toi sau tham (dark core `Color(0.07, 0.07, 0.09)`), vien ngoai den dam (`Color.BLACK`), va 2 lop neon outline ruc ro (lop ngoai alpha 0.3, lop trong dam net) co mau sac dong bo hoa voi rainbow trail. Tam bong co them mot diem sang bao hoa (white + glow color overlay). Toan bo mau neon duoc tinh toan dong chi dua tren thoi gian thuc de tao hieu ung bien ao lien tuc (`hue = wrapf(time_elapsed * 0.25, 0.0, 1.0)`).
 - **Rainbow Stamp Trail co fade thoi gian & gradient theo nhip**: He thong stamp tron chong chen, stamp duoc to mau dua tren chu ky va cham (hit_count) va stamp index de tao cac block mau bao hoa sac net ruc ro. Cac stamp mo dan theo tuoi dua vao elapsed_time, tao hieu ung duoi sao choi.
 - Text hook o tren va duoi.
 
@@ -31,7 +31,7 @@ CircleBounceView la root view node, quan ly 3 child view:
 Visual he thong duong di cua bong trong `circle_bounce` khong phai la cac duong thang noi tiep thong thuong, ma su dung **He thong Stamp (overlapping circles)**:
 - Bong di chuyen den dau se de lai cac dau vet tron (stamp) tai do voi khoang cach buoc di chuyen phu thuoc ty le thuan vao ban kinh bong (`step = clampf(ball.radius * 0.28, 6.0, 22.0)`).
 - Moi stamp duoc ve voi mot vien ngoai mau den mo dam (alpha = 0.9 × age_factor) co ban kinh `radius`, sau do chong mot vong tron ruot mau sac nho hon vao trong (`radius - 2.0`).
-- Khi kich hoat `use_rainbow_trail`, mau sac cua chuoi stamp chuyen doi theo cong thuc: `hue = wrapf(hit_count * 0.08 + i * 0.0005, 0.0, 1.0)` tao ra cac khoi mau bat mat thay doi theo tung nhip va cham.
+- Khi kich hoat `use_rainbow_trail`, mau sac cua chuoi stamp chuyen doi theo gradient phan bo deu tren toan bo chieu dai trail: `phase = i / stamps_count; hue = wrapf(phase + elapsed_time * 0.25, 0.0, 1.0)`. Cach nay tao dai mau sac lien tuc chuyen dong cham tu dau trail (gan ball) den cuoi trail.
 
 ### Fade theo thoi gian (age-based fading)
 
@@ -67,9 +67,8 @@ Qua bong duoc ve voi phong cach neon-toi (dark aesthetic) de noi bat tren nen de
    - Vong ngoai mo rong (`Color(glow_col.r, glow_col.g, glow_col.b, 0.3)`, width 5.5) tao anh sang neon toa ra nhe.
 4. **Saturated Core Dot**: Diem sang mau trang choi (`Color.WHITE`) va overlay glow color tai tam bong (`radius * 0.22`).
 
-Mau neon `glow_col` duoc tinh dong tu 3 yeu to vi tri, van toc va thoi gian:
-- `hue = wrapf(pos_hue * 0.4 + dir_hue * 0.3 + time_hue * 0.3, 0.0, 1.0)`
-- Trong do `pos_hue = position.x * 0.0003 + position.y * 0.0004`, `dir_hue = (velocity.angle() + PI) / TAU`, va `time_hue = time_elapsed * 0.06`.
+Mau neon `glow_col` duoc tinh dong chi dua tren thoi gian thuc:
+- `hue = wrapf(time_elapsed * 0.25, 0.0, 1.0)`
 
 ### Hien thi Ball Icon va Placeholder (Dynamic Rendering)
 Khi dat `use_ball_icon = true`, qua bong se duoc ve bang cach xep chong cac layer sau:
@@ -91,7 +90,7 @@ Khi dat `use_ball_icon = true`, qua bong se duoc ve bang cach xep chong cac laye
 - Khi ball trong vong 15% ban kinh gan bien: `glow_intensity = 1.0 + proximity * 2.0` (toi da 3x).
 
 ### Trail stamps
-- Gradient chuyen doi mau sac theo hit_count va stamp index: `hue = wrapf(hit_count * 0.08 + i * 0.0005, 0.0, 1.0)`.
+- Gradient chuyen doi mau sac theo phan bo deu tren toan bo chieu dai trail: `phase = i / stamps_count; hue = wrapf(phase + elapsed_time * 0.25, 0.0, 1.0)`, tao dai mau sac cau vong lien tuc tu dau den cuoi trail va di chuyen cham theo thoi gian.
 - Fade dan theo elapsed_time va trail_lifetime cua tung trail_mode. Safety limit toi da cua stamp array la `20000`.
 
 ## Arena neon pulse va Edge flash
@@ -107,6 +106,21 @@ Moi va cham hop le kich hoat 2 hieu ung tren ArenaView:
 - Cuong do su dung `sin(alpha * PI)` de tao hieu ung bung len roi tan muot ma
 - Core trang choi `alpha² * 0.8` tao cam giac den neon bung sang
 - Toan bo vong tron arena phat sang
+
+## Polygon Arena Shockwave Rings
+
+Danh rieng cho `polygon_bounce` mode. Moi va cham hop le sinh ra cac vong song xung kich (shockwave) gian no tu arena da giac ra ngoai:
+
+- So vong va do gian no toi da thay doi theo phase:
+  - `intro`: 3 vong, max scale 1.3 (gian no nhe)
+  - `build_up`: 4 vong, max scale 1.5
+  - `final_storm` / `climax_storm`: 5 vong, max scale 1.8 (gian no manh)
+- Moi vong cach nhau **0.07 giay** delay, tao hieu ung song lien tiep
+- Moi vong ton tai **0.5 giay**, scale noi suy tu 1.0 len max_scale
+- Alpha noi suy theo life: `alpha = (life / max_life) * 0.55 * arena_alpha`
+- Ve bang `draw_polyline()` voi cac dinh da giac da scale tu center, do day `line_width + 4.0 * alpha`
+
+Cac vong cung bi anh huong boi `arena_alpha` (fade-out trong climax_storm).
 
 ## Ball Pulse va cham
 

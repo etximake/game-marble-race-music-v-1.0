@@ -11,9 +11,12 @@ var time_elapsed: float = 0.0
 var controller_ref: RefCounted = null
 var phases: Array = []
 
+var suppress_climax_fade: bool = false
+
 var edge_flashes: Array[Dictionary] = []
 var line_neon_pulses: Array[Dictionary] = []
 var sparks: Array[Dictionary] = []
+var shockwave_rings: Array[Dictionary] = []
 
 func setup(p_state: ArenaState, visual_config: Dictionary, p_controller: RefCounted = null, p_phases: Array = []):
 	state = p_state
@@ -79,6 +82,28 @@ func flash_at(flash_position: Vector2, flash_color: Color, normal: Vector2 = Vec
 				"max_life": lifetime
 			})
 
+	var ring_count = 4
+	var ring_max_scale = 1.20
+	if phase_name == "intro":
+		ring_count = 3
+		ring_max_scale = 1.10
+	elif phase_name == "build_up":
+		ring_count = 4
+		ring_max_scale = 1.20
+	elif phase_name == "final_storm" or phase_name == "climax_storm":
+		ring_count = 5
+		ring_max_scale = 1.35
+
+	for r in range(ring_count):
+		shockwave_rings.append({
+			"delay": float(r) * 0.07,
+			"life": 0.5,
+			"max_life": 0.5,
+			"scale": 1.0,
+			"max_scale": ring_max_scale,
+			"color": flash_color
+		})
+
 func _process(delta: float):
 	if use_rainbow:
 		time_elapsed += delta
@@ -111,6 +136,20 @@ func _process(delta: float):
 			# Add speed decay
 			spark["velocity"] *= 0.95
 		k -= 1
+
+	var s = shockwave_rings.size() - 1
+	while s >= 0:
+		var ring = shockwave_rings[s]
+		if ring["delay"] > 0.0:
+			ring["delay"] -= delta
+		else:
+			ring["life"] -= delta
+			if ring["life"] <= 0.0:
+				shockwave_rings.remove_at(s)
+			else:
+				var progress = 1.0 - (ring["life"] / ring["max_life"])
+				ring["scale"] = lerpf(1.0, ring["max_scale"], progress)
+		s -= 1
 
 	queue_redraw()
 
@@ -145,7 +184,7 @@ func _draw():
 	if state.type == "circle":
 		# Calculate arena line alpha (fade out completely during climax_storm)
 		var arena_alpha = 1.0
-		if current_phase_name == "climax_storm":
+		if current_phase_name == "climax_storm" and not suppress_climax_fade:
 			# Fade out smoothly over 0.6 seconds
 			var time_in_climax = 0.0
 			if controller_ref:
@@ -212,6 +251,15 @@ func _draw():
 				true
 			)
 
+		for ring in shockwave_rings:
+			var alpha = ring["life"] / ring["max_life"]
+			if alpha <= 0.0 or ring["delay"] > 0.0:
+				continue
+			var col = ring["color"] as Color
+			var ring_alpha = alpha * 0.55 * arena_alpha
+			var scaled_radius = state.radius * ring["scale"]
+			draw_arc(state.center, scaled_radius, 0.0, TAU, 360, Color(col.r, col.g, col.b, ring_alpha), state.line_width + 4.0 * alpha, true)
+
 	# Local colorful impact glow burst at collision point (no solid sharp circle/dot)
 	for flash in edge_flashes:
 		var alpha = flash["life"] / flash["max_life"]
@@ -243,4 +291,3 @@ func _draw():
 			draw_line(spark["position"], endpoint, Color(col.r, col.g, col.b, alpha * 0.3), 6.0, true)
 			# Core bright line
 			draw_line(spark["position"], endpoint, Color(1.0, 1.0, 1.0, alpha * 0.9), 2.0, true)
-

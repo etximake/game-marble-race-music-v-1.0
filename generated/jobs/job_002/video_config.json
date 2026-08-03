@@ -1,6 +1,6 @@
 {
   "video": {
-    "duration": 24.0,
+    "duration": 24.674,
     "output_name": "music_ball_job_002"
   },
   "audio": {
@@ -256,85 +256,13 @@
       {
         "index": 61,
         "file": "note_0062.wav"
-      },
-      {
-        "index": 62,
-        "file": "note_0063.wav"
-      },
-      {
-        "index": 63,
-        "file": "note_0064.wav"
-      },
-      {
-        "index": 64,
-        "file": "note_0065.wav"
-      },
-      {
-        "index": 65,
-        "file": "note_0066.wav"
-      },
-      {
-        "index": 66,
-        "file": "note_0067.wav"
-      },
-      {
-        "index": 67,
-        "file": "note_0068.wav"
-      },
-      {
-        "index": 68,
-        "file": "note_0069.wav"
-      },
-      {
-        "index": 69,
-        "file": "note_0070.wav"
-      },
-      {
-        "index": 70,
-        "file": "note_0071.wav"
-      },
-      {
-        "index": 71,
-        "file": "note_0072.wav"
-      },
-      {
-        "index": 72,
-        "file": "note_0073.wav"
-      },
-      {
-        "index": 73,
-        "file": "note_0074.wav"
-      },
-      {
-        "index": 74,
-        "file": "note_0075.wav"
-      },
-      {
-        "index": 75,
-        "file": "note_0076.wav"
-      },
-      {
-        "index": 76,
-        "file": "note_0077.wav"
-      },
-      {
-        "index": 77,
-        "file": "note_0078.wav"
-      },
-      {
-        "index": 78,
-        "file": "note_0079.wav"
-      },
-      {
-        "index": 79,
-        "file": "note_0080.wav"
       }
     ]
   },
   "text": {
     "show_text": true,
-    "top_text": "Can you guess this name music?",
-    "bottom_text": "Stay till the end to find out!",
+    "top_text": "Guess this song from \n the satisfying beats! \u2728",
+    "bottom_text": "Wait for the drop at the end! \ud83e\udd2b",
     "song_name": "Cupid - Fifty Fifty"
   },
   "job_assets": {

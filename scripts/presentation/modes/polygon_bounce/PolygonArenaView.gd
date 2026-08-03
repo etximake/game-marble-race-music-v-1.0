@@ -11,6 +11,8 @@ var time_elapsed: float = 0.0
 var controller_ref: RefCounted = null
 var phases: Array = []
 
+var suppress_climax_fade: bool = false
+
 var edge_flashes: Array[Dictionary] = []
 var line_neon_pulses: Array[Dictionary] = []
 var sparks: Array[Dictionary] = []
@@ -186,7 +188,7 @@ func _draw():
 
 	# Calculate arena line alpha (fade out completely during climax_storm)
 	var arena_alpha = 1.0
-	if current_phase_name == "climax_storm":
+	if current_phase_name == "climax_storm" and not suppress_climax_fade:
 		var time_in_climax = 0.0
 		if controller_ref:
 			time_in_climax = controller_ref.current_time - reveal_t

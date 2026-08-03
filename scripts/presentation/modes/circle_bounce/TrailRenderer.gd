@@ -120,7 +120,7 @@ func _draw():
 		var col = base_color
 		if use_rainbow:
 			var phase = float(i) / max(float(stamps_count), 1.0)
-			var hue = wrapf(phase + elapsed_time * 0.25, 0.0, 1.0)
+			var hue = wrapf(phase * 2.5 - elapsed_time * 0.35, 0.0, 1.0)
 			col = Color.from_hsv(hue, 1.0, 1.0)
 
 		col.a = age_factor * 1.0

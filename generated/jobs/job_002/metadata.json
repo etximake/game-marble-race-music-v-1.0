@@ -1,7 +1,7 @@
 {
   "source_file": "source/Cupid - Twin Ver (mp3cut.net).mp3",
-  "duration": 24.0,
+  "duration": 24.674,
   "sample_rate": 44100,
   "slice_mode": "fixed_interval",
-  "note_count": 80
+  "note_count": 62
 }

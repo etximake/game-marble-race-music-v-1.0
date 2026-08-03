@@ -8,7 +8,7 @@ extends Node
 
 var config_path: String = "res://generated/jobs/job_002/video_config.json"
 var template_path: String = ""
-var selected_mode: String = "polygon_bounce"
+var selected_mode: String = "circle_puzzle"
 var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D

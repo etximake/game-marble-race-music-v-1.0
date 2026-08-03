@@ -2,7 +2,7 @@
 class_name GameModeRegistry
 extends RefCounted
 
-const SUPPORTED_MODES = ["circle_bounce", "polygon_bounce"]
+const SUPPORTED_MODES = ["circle_bounce", "polygon_bounce", "circle_puzzle", "polygon_puzzle"]
 
 static func is_supported(mode_name: String) -> bool:
 	return mode_name in SUPPORTED_MODES
