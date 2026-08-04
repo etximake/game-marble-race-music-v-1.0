@@ -10,7 +10,7 @@
       "additionalProperties": false,
       "required": ["duration", "output_name"],
       "properties": {
-        "duration": {"type": "number", "exclusiveMinimum": 0, "maximum": 30},
+        "duration": {"type": "number", "exclusiveMinimum": 0, "maximum": 60},
         "output_name": {"type": "string", "minLength": 1}
       }
     },
@@ -61,6 +61,15 @@
             {"pattern": "^#[0-9A-Fa-f]{6}$"}
           ]
         }
+      }
+    },
+    "quiz": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "prompt": {"type": "string"},
+        "reveal_time": {"type": "number"},
+        "enabled": {"type": "boolean"}
       }
     }
   }

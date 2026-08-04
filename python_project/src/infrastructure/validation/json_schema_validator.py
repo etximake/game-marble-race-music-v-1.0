@@ -33,9 +33,10 @@ class JsonSchemaVideoConfigValidator:
 
         # 2. Job Music semantic validation
         duration = config.video.duration
-        if not (1.0 <= duration <= 30.0):
+        # Cho phép giới hạn tối đa 60.0 giây cho các video Shorts dài hơn (hoặc Puzzle được cộng thêm 6s)
+        if not (1.0 <= duration <= 60.0):
             raise VideoConfigValidationError(
-                f"video.duration ({duration}) must be between 1.0 and 30.0 seconds."
+                f"video.duration ({duration}) must be between 1.0 and 60.0 seconds."
             )
 
         # Check audio notes structure

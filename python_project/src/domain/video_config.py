@@ -70,11 +70,15 @@ class VideoConfig:
     audio: AudioSettings
     text: TextSettings
     job_assets: JobAssets = JobAssets()
+    quiz: Dict[str, Any] = None  # Thêm trường quiz
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "video": self.video.to_dict(),
             "audio": self.audio.to_dict(),
             "text": self.text.to_dict(),
             "job_assets": self.job_assets.to_dict(),
         }
+        if self.quiz is not None:
+            result["quiz"] = self.quiz
+        return result

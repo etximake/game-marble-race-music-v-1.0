@@ -268,5 +268,10 @@
   "job_assets": {
     "ball_icon_path": "res://assets/icons/Cupid.png",
     "ball_color": "#FF7043"
+  },
+  "quiz": {
+    "prompt": "Guess this song from \n the satisfying beats! \u2728",
+    "reveal_time": 18.674,
+    "enabled": true
   }
 }

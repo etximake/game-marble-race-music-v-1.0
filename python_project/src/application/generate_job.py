@@ -80,13 +80,34 @@ class GenerateJobUseCase:
                 job_assets["ball_color"] = self.BALL_PALETTE[palette_index]
 
             # 5. Generate Video Config
+            is_puzzle = any("puzzle" in p for p in presets) if presets else False
+            music_duration = norm_metadata.duration_seconds
+            # Tổng thời lượng video bằng chính xác độ dài file nhạc để phát liền mạch
+            video_duration = music_duration
+
+            # Đảm bảo trường quiz được khởi tạo là dictionary
+            quiz_data = {}
+            if custom_text and "prompt" in custom_text:
+                quiz_data["prompt"] = custom_text["prompt"]
+            elif custom_text and "top_text" in custom_text:
+                quiz_data["prompt"] = custom_text["top_text"]
+            else:
+                quiz_data["prompt"] = "Đoán tên bài hát này!"
+            # Mốc reveal_time bắt đầu sớm hơn 6s trước khi kết thúc nhạc đối với chế độ Puzzle
+            quiz_data["reveal_time"] = music_duration - 6.0 if is_puzzle else music_duration
+            quiz_data["enabled"] = True
+
             video_config = self.video_config_generator.execute(
                 metadata=norm_metadata,
                 note_clips=note_clips,
                 output_name=f"music_ball_{job_id}",
                 custom_text=custom_text,
                 custom_job_assets=job_assets,
+                video_duration=video_duration,
             )
+            
+            # Gán trường quiz cho video_config trước khi validate
+            object.__setattr__(video_config, 'quiz', quiz_data)
 
             # 6. Validate Video Config
             self.validator.validate(video_config)

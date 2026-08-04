@@ -19,6 +19,7 @@ class GenerateVideoConfigUseCase:
         output_name: str,
         custom_text: Optional[Dict[str, Any]] = None,
         custom_job_assets: Optional[Dict[str, Any]] = None,
+        video_duration: Optional[float] = None,
     ) -> VideoConfig:
         text_data = {
             "show_text": True,
@@ -32,9 +33,11 @@ class GenerateVideoConfigUseCase:
         assets = custom_job_assets or {}
         notes = [{"index": clip.index, "file": clip.file_name} for clip in note_clips]
 
+        final_duration = video_duration if video_duration is not None else metadata.duration_seconds
+
         return VideoConfig(
             video=VideoSettings(
-                duration=metadata.duration_seconds,
+                duration=final_duration,
                 output_name=output_name,
             ),
             audio=AudioSettings(

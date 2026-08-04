@@ -15,8 +15,8 @@ func play_from(seconds: float) -> bool:
 	if play_pos < 0.0:
 		play_pos = 0.0
 	elif play_pos >= stream.get_length():
-		printerr("AudioSourcePlayer: Play position is beyond stream length: ", seconds, " >= ", stream.get_length())
-		return false
+		# Nếu bị vượt quá do làm tròn float ở giây cuối, tự động lùi về vị trí an toàn sát cuối (0.05s trước khi kết thúc)
+		play_pos = max(0.0, stream.get_length() - 0.05)
 		
 	play(play_pos)
 	return playing

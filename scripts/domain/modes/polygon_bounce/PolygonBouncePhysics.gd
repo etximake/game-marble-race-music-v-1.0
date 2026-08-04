@@ -91,6 +91,11 @@ static func apply_evolution(ball: BallState, gameplay_config: Dictionary, growth
 	var arena_radius = float(arena_cfg.get("radius", 470.0))
 	var absolute_max_radius = min(max_radius, arena_radius * max_radius_ratio)
 
+	# Khống chế kích thước bóng tối đa khi chơi chế độ puzzle để không che mờ ảnh gợi ý 500px (bán kính 250px)
+	var game_mode = gameplay_config.get("game_mode", "")
+	if game_mode != "" and "puzzle" in game_mode:
+		absolute_max_radius = min(absolute_max_radius, 120.0)
+
 	var effective_growth = 1.0 + (growth_per_hit - 1.0) * growth_mult
 	var target_radius = ball.radius * effective_growth
 	ball.radius = min(target_radius, absolute_max_radius)

@@ -155,8 +155,8 @@ func _process(delta: float):
 		var quiz_cfg = video_config.get_quiz_config()
 		var enabled = quiz_cfg.get("enabled", true)
 		var reveal_t = float(quiz_cfg.get("reveal_time", -1.0))
-		if enabled and reveal_t > 0.0:
-			ui_overlay.update_countdown(sim_controller.current_time, reveal_t)
+		# Bỏ update_countdown 3-2-1 để tăng tốc độ hook ban đầu
+		pass
 			
 	if is_started and audio_coordinator and video_config and sim_controller:
 		audio_coordinator.update_audio_filters(sim_controller.current_time, video_config.get_phases())

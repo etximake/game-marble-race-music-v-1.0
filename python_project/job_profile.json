@@ -1,6 +1,6 @@
 {
   "job_id": "job_002",
-  "gameplay_presets": ["circle_puzzle", "polygon_puzzle"],
+  "gameplay_presets": ["circle_puzzle", "polygon_puzzle", "circle_bounce", "polygon_bounce"],
   "input_path": "source/Cupid - Twin Ver (mp3cut.net).mp3",
   "target_duration_seconds": 26.0,
   "slice_mode": "fixed_interval",

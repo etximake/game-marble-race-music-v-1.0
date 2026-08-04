@@ -36,11 +36,29 @@ func setup(p_controller, p_visual_config, job_folder = "", phases = [], p_quiz_c
 	var top_text = p_quiz_config.get("prompt", "")
 	puzzle_grid.setup(ball_icon_path, top_text, job_folder)
 
+	# Chỉnh vị trí Z-index để ẩn Trail dưới đĩa than tròn nhưng bóng nổi lên trên
+	# Arena: z_index = 0
+	# TrailRenderer: z_index = 1
+	# PuzzleGrid (Đĩa than): z_index = 2
+	# Ball (Bóng): z_index = 5
+	trail_renderer.z_index = 1
+	puzzle_grid.z_index = 2
+	ball_view.z_index = 5
+
 	progress_bar.setup()
 
 func _process(delta):
 	if controller and ball_view:
 		ball_view.time_elapsed = controller.current_time
+		
+		# Đồng bộ hoá ProgressBar và Puzzle đầy mượt mà (Linear Interpolation)
+		var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
+		if progress_bar:
+			progress_bar.fill_ratio = clampf(controller.current_time / puzzle_duration, 0.0, 1.0)
+			
+		if controller.current_time >= puzzle_duration:
+			if puzzle_grid and not puzzle_grid.is_complete:
+				puzzle_grid.reveal_all()
 
 func handle_mode_event(event):
 	if event.type == "ball_collided":
@@ -63,5 +81,14 @@ func handle_mode_event(event):
 
 	elif event.type == "note_triggered":
 		note_count += 1
-		puzzle_grid.reveal_by_phase(controller.current_time, duration, phases)
-		progress_bar.update_progress(puzzle_grid.reveal_count, puzzle_grid.total_cells)
+		if puzzle_grid:
+			var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
+			# Nếu đã bước sang 6s cuối, tự động lật mở hoàn toàn đĩa tròn
+			if controller.current_time >= puzzle_duration:
+				puzzle_grid.reveal_all()
+			elif controller.current_time >= 3.0: # Giới hạn bắt đầu mở mảnh ghép từ giây thứ 3.0 trở đi
+				puzzle_grid.reveal_by_phase(controller.current_time, puzzle_duration, phases)
+			
+			if progress_bar:
+				# Hiệu ứng nảy thanh tiến trình theo nhịp nốt nhạc (beat pulse)
+				progress_bar.trigger_pulse()

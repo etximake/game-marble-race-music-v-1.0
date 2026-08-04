@@ -2,76 +2,42 @@
 class_name PuzzleGridOverlay
 extends Node2D
 
-const GRID_SIZE = 3
-const CELL_SIZE = 160
-const GRID_PIXEL = 480
-const GRID_X = 300
+# Cấu hình đĩa than tròn đồng tâm 500px chính giữa Arena (540, 1080)
+const ALBUM_SIZE = 640
+const REVEAL_SLICES = 8 # Chia nhãn tròn làm 8 mảnh hình quạt để mở
 
-var image_texture = null
-var cell_nodes = []
-var revealed = []
-var total_cells = GRID_SIZE * GRID_SIZE
-var reveal_count = 0
-var is_complete = false
-var reveal_target = 0
-var phase_reveal_targets = [1, 3, 6, 9]
+var image_texture: Texture2D = null
+var revealed: Array = []
+var reveal_count: int = 0
+var total_cells: int = REVEAL_SLICES # Đồng bộ số mảnh
+var is_complete: bool = false
+var reveal_target: int = 0
+var phase_reveal_targets = [1, 2, 4, 8] # Tiến độ lộ diện theo từng phase
 
-var top_text = null
-var answer_label = null
-var glow_timer = 0.0
-var show_glow = false
+var spin_angle: float = 0.0
+var show_glow: bool = false
+var glow_timer: float = 0.0
 
-func setup(p_image_path, p_top_text, p_job_folder):
+# Vết đĩa than
+var center_offset: Vector2 = Vector2(540, 1080)
+
+func setup(p_image_path: String, p_top_text: String, p_job_folder: String):
 	reveal_target = 0
+	reveal_count = 0
+	is_complete = false
+	revealed.clear()
+	for i in range(REVEAL_SLICES):
+		revealed.append(false)
 
-	top_text = Label.new()
-	top_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	top_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	top_text.add_theme_font_size_override("font_size", 28)
-	top_text.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.9))
-	top_text.text = p_top_text
-	top_text.size = Vector2(GRID_PIXEL, GRID_PIXEL)
-	top_text.position = Vector2.ZERO
-	top_text.z_index = 100
-	add_child(top_text)
-
-	answer_label = Label.new()
-	answer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	answer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	answer_label.add_theme_font_size_override("font_size", 32)
-	answer_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0, 1.0))
-	answer_label.size = Vector2(GRID_PIXEL, GRID_PIXEL)
-	answer_label.position = Vector2.ZERO
-	answer_label.z_index = 99
-	answer_label.visible = false
-	add_child(answer_label)
-
+	# Bỏ hoàn toàn top_text và answer_label đè lên ảnh (Main UI đã hiển thị ở Header)
 	if p_image_path != "":
 		_load_image(p_image_path, p_job_folder)
+		
+	# Đặt vị trí cục bộ ở tâm Arena để dễ vẽ xoay tròn đồng tâm
+	position = Vector2.ZERO
+	z_index = 2 # Đặt dưới bóng (z_index=5) và có thể trên hoặc dưới trail tùy cấu hình z_index
 
-	for r in range(GRID_SIZE):
-		for c in range(GRID_SIZE):
-			var idx = r * GRID_SIZE + c
-			revealed.append(false)
-
-			var cell = TextureRect.new()
-			cell.size = Vector2(CELL_SIZE, CELL_SIZE)
-			cell.position = Vector2(c * CELL_SIZE, r * CELL_SIZE)
-			cell.z_index = 10
-
-			if image_texture:
-				var atlas = AtlasTexture.new()
-				atlas.atlas = image_texture
-				atlas.region = Rect2(Vector2(c * CELL_SIZE, r * CELL_SIZE), Vector2(CELL_SIZE, CELL_SIZE))
-				cell.texture = atlas
-
-			cell.modulate.a = 0.0
-			cell.scale = Vector2(0.8, 0.8)
-			cell.pivot_offset = Vector2(CELL_SIZE / 2.0, CELL_SIZE / 2.0)
-			add_child(cell)
-			cell_nodes.append(cell)
-
-func _load_image(p_path, p_job_folder):
+func _load_image(p_path: String, p_job_folder: String):
 	var img = Image.new()
 	var final_path = p_path
 	if not final_path.begins_with("res://") and p_job_folder != "":
@@ -80,10 +46,10 @@ func _load_image(p_path, p_job_folder):
 		final_path = "res://" + final_path
 	var err = img.load(final_path)
 	if err == OK:
-		img.resize(GRID_PIXEL, GRID_PIXEL, Image.INTERPOLATE_LANCZOS)
+		img.resize(ALBUM_SIZE, ALBUM_SIZE, Image.INTERPOLATE_LANCZOS)
 		image_texture = ImageTexture.create_from_image(img)
 
-func reveal_cells(count):
+func reveal_cells(count: int):
 	var unrevealed = []
 	for i in range(total_cells):
 		if not revealed[i]:
@@ -95,21 +61,13 @@ func reveal_cells(count):
 		revealed[idx] = true
 		reveal_count += 1
 
-		var tween = create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(cell_nodes[idx], "modulate:a", 1.0, 0.25).set_ease(Tween.EASE_OUT)
-		tween.tween_property(cell_nodes[idx], "scale", Vector2(1.0, 1.0), 0.25).set_ease(Tween.EASE_OUT)
-
 	if reveal_count >= total_cells:
 		is_complete = true
-		_hide_top_text()
 		_trigger_complete_glow()
 
-func reveal_by_phase(current_time, duration, phases):
+func reveal_by_phase(current_time: float, duration: float, phases: Array):
 	if is_complete or duration <= 0.0:
 		return
-
-	var ratio = clampf(current_time / duration, 0.0, 1.0)
 
 	var phase_idx = 0
 	if not phases.is_empty():
@@ -127,45 +85,86 @@ func reveal_by_phase(current_time, duration, phases):
 
 func reveal_all():
 	for i in range(total_cells):
-		if not revealed[i]:
-			revealed[i] = true
-			reveal_count += 1
-			cell_nodes[i].modulate.a = 1.0
-			cell_nodes[i].scale = Vector2(1.0, 1.0)
+		revealed[i] = true
+	reveal_count = total_cells
 	is_complete = true
-	_hide_top_text()
 	_trigger_complete_glow()
-
-func _hide_top_text():
-	var tween = create_tween()
-	tween.tween_property(top_text, "modulate:a", 0.0, 0.3)
-	tween.tween_callback(func(): top_text.visible = false)
-
-func show_answer(p_song_name):
-	answer_label.text = p_song_name
-	answer_label.modulate.a = 0.0
-	answer_label.visible = true
-	var tween = create_tween()
-	tween.tween_property(answer_label, "modulate:a", 1.0, 0.5).set_ease(Tween.EASE_OUT)
 
 func _trigger_complete_glow():
 	show_glow = true
 	glow_timer = 1.0
 
-func _process(delta):
+func _process(delta: float):
+	# Xoay đĩa than nhẹ nhàng 15 độ mỗi giây
+	spin_angle += deg_to_rad(15.0) * delta
+	if spin_angle > TAU:
+		spin_angle -= TAU
+
 	if show_glow:
 		glow_timer -= delta
 		if glow_timer <= 0.0:
 			show_glow = false
-		queue_redraw()
+	queue_redraw()
 
 func _draw():
-	if not show_glow:
-		return
+	var radius = ALBUM_SIZE / 2.0
+	
+	# 1. Vẽ đế đĩa than đen bóng
+	draw_circle(center_offset, radius, Color(0.06, 0.06, 0.08, 0.95))
+	
+	# Vẽ các rãnh vinyl grooves đồng tâm siêu mảnh
+	for i in range(6):
+		var r = radius - 15.0 - float(i) * 30.0
+		if r > 40.0:
+			draw_arc(center_offset, r, 0, TAU, 180, Color(0.18, 0.18, 0.22, 0.4), 1.0, true)
 
-	var progress = 1.0 - (glow_timer / 1.0)
-	var alpha = sin(progress * PI * 2.0) * 0.4 + 0.3
-	var hue = wrapf(progress * 0.5, 0.0, 1.0)
-	var col = Color.from_hsv(hue, 0.8, 1.0, alpha)
-	var rect = Rect2(Vector2(GRID_X - 8, 0), Vector2(GRID_PIXEL + 16, GRID_PIXEL))
-	draw_rect(rect, col, false, 4.0)
+	# 2. Vẽ ảnh Album Art ở giữa (bo tròn hoàn hảo)
+	if image_texture:
+		var old_transform = get_canvas_transform()
+		# Dịch chuyển tâm và xoay bằng cách vẽ thủ công hoặc tính toán toạ độ xoay của các phân vùng
+		# Thay vì dùng draw_get_transform (không tồn tại trong CanvasItem/Node2D của Godot 4, bản chất là draw_set_transform)
+		# Chúng ta sử dụng draw_set_transform có sẵn của CanvasItem
+		draw_set_transform(center_offset, spin_angle, Vector2.ONE)
+		
+		# Nhãn đĩa tròn trung tâm (đường kính 420px, bán kính 210px để lộ viền đĩa than đen ở ngoài)
+		var label_r = 280.0
+		var label_size = label_r * 2.0
+		var rect = Rect2(-label_r, -label_r, label_size, label_size)
+		
+		# Vẽ ảnh
+		draw_texture_rect(image_texture, rect, false)
+		
+		# Vẽ các mảnh che tối chưa được reveal
+		var slice_angle = TAU / REVEAL_SLICES
+		for i in range(REVEAL_SLICES):
+			if not revealed[i]:
+				var points = PackedVector2Array()
+				points.append(Vector2.ZERO)
+				var start_a = float(i) * slice_angle
+				var end_a = float(i + 1) * slice_angle
+				# Vẽ đa giác hình quạt
+				var steps = 12
+				for step in range(steps + 1):
+					var a = start_a + (end_a - start_a) * (float(step) / float(steps))
+					points.append(Vector2(cos(a), sin(a)) * label_r)
+				
+				# Phủ màu đen mờ che ảnh
+				draw_polygon(points, PackedColorArray([Color(0.08, 0.08, 0.1, 0.98)]))
+				# Vẽ đường line chia các mảnh
+				draw_line(Vector2.ZERO, Vector2(cos(start_a), sin(start_a)) * label_r, Color(0.02, 0.02, 0.04, 0.5), 1.5, true)
+		
+		# Reset lại transform về mặc định
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		
+		# 3. Vẽ tâm trục đĩa (Spindle Hole) bóng bẩy
+		draw_circle(center_offset, 24.0, Color(0.1, 0.1, 0.12, 1.0))
+		draw_circle(center_offset, 10.0, Color(0.02, 0.02, 0.02, 1.0))
+		draw_arc(center_offset, 24.0, 0, TAU, 64, Color(0.5, 0.5, 0.55, 0.8), 2.0, true)
+
+	# 4. Hiệu ứng viền phát sáng khi ghép xong đĩa
+	if show_glow:
+		var progress = 1.0 - (glow_timer / 1.0)
+		var alpha = sin(progress * PI * 2.0) * 0.4 + 0.4
+		var hue = wrapf(progress * 0.5, 0.0, 1.0)
+		var col = Color.from_hsv(hue, 0.9, 1.0, alpha)
+		draw_arc(center_offset, radius + 4.0, 0, TAU, 180, col, 6.0, true)

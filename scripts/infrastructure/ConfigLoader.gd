@@ -73,28 +73,40 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 		var phases = merged_data["phases"] as Array
 		if not phases.is_empty():
 			var duration = float(merged_data.get("video", {}).get("duration", 46.0))
+			var game_mode = str(merged_data.get("game_mode", ""))
+			var is_puzzle = "puzzle" in game_mode
 			
-			# Determine reveal time based on quiz reveal ratio, but guarantee at least 6 seconds of climax_storm
-			var reveal_time = duration - 6.0
-			if reveal_time < duration * 0.70:
-				reveal_time = duration * 0.70 # fallback to 30% climax time for extremely short videos
+			# Tự động đồng bộ hoá reveal_time đúng bằng mốc thời gian nhạc tắt (duration - 6s đối với Puzzle)
+			var reveal_time = duration
+			if is_puzzle:
+				reveal_time = duration - 6.0
+				if reveal_time < duration * 0.70:
+					reveal_time = duration * 0.70 # fallback
+			else:
+				# Nhóm Bounce thường thì kết thúc ở điểm cuối video
+				reveal_time = duration
 				
 			if merged_data.has("quiz") and typeof(merged_data["quiz"]) == TYPE_DICTIONARY:
 				var quiz = merged_data["quiz"] as Dictionary
 				quiz["reveal_time"] = reveal_time
 
-			# Re-build phase list to strictly enforce fixed/clamped timings for Shorts pacing:
-			# Phase 0: Intro - 2.0s (or 25% of duration if duration is very short)
-			# Phase 1: Build-up - from 2.0s to 10.0s (or 25%-50% if duration is very short)
-			# Phase 2: Final Storm - from 10.0s to reveal_time
-			# Phase 3: Climax Storm - from reveal_time to duration
+			# Thiết kế mốc thời gian cho 4 Phase (đảm bảo cả 4 mode game):
+			# Chế độ puzzle:
+			# - intro: 0.0s -> 2.0s
+			# - build_up: 2.0s -> 8.0s
+			# - final_storm: 8.0s -> reveal_time (18.6s đối với bài 24s)
+			# - climax_storm: reveal_time -> duration (6s cuối tĩnh phát nhạc gốc)
+			# Chế độ thường:
+			# - intro: 0.0s -> 2.0s
+			# - build_up: 2.0s -> 10.0s
+			# - final_storm: 10.0s -> duration
 			var intro_end = 2.0
-			var buildup_end = 10.0
+			var buildup_end = 8.0 if is_puzzle else 10.0
 			if duration < 12.0:
 				intro_end = duration * 0.2
 				buildup_end = duration * 0.5
 
-			# Clear existing template phases and dynamically construct our 4-phase sequence
+			# Clear existing template phases and dynamically construct our phase sequence
 			var new_phases = []
 			
 			# Phase 1: intro
@@ -119,27 +131,39 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 				"trajectory_control": 0.5
 			})
 
-			# Phase 3: final_storm
-			new_phases.append({
-				"name": "final_storm",
-				"start_time": buildup_end,
-				"end_time": reveal_time,
-				"speed_multiplier": 3.5,
-				"growth_multiplier": 4.0,
-				"trail_multiplier": 3.0,
-				"trajectory_control": 1.0
-			})
-
-			# Phase 4: climax_storm (Storm unleashed on reveal, ball flies free and ultra fast)
-			new_phases.append({
-				"name": "climax_storm",
-				"start_time": reveal_time,
-				"end_time": duration,
-				"speed_multiplier": 10.0,
-				"growth_multiplier": 10.0,
-				"trail_multiplier": 3.5,
-				"trajectory_control": 1.0
-			})
+			if is_puzzle:
+				# Phase 3: final_storm (Lật mở mảnh)
+				new_phases.append({
+					"name": "final_storm",
+					"start_time": buildup_end,
+					"end_time": reveal_time,
+					"speed_multiplier": 3.5,
+					"growth_multiplier": 4.0,
+					"trail_multiplier": 3.0,
+					"trajectory_control": 1.0
+				})
+				
+				# Phase 4: climax_storm (6 giây cuối công bố đáp án tĩnh, bóng bay tự do siêu tốc)
+				new_phases.append({
+					"name": "climax_storm",
+					"start_time": reveal_time,
+					"end_time": duration,
+					"speed_multiplier": 10.0,
+					"growth_multiplier": 1.0, # Không phát triển bóng to thêm nữa để giữ chỗ xem ảnh
+					"trail_multiplier": 3.5,
+					"trajectory_control": 1.0
+				})
+			else:
+				# Chế độ thường: final_storm kéo dài đến hết video
+				new_phases.append({
+					"name": "final_storm",
+					"start_time": buildup_end,
+					"end_time": duration,
+					"speed_multiplier": 3.5,
+					"growth_multiplier": 4.0,
+					"trail_multiplier": 3.0,
+					"trajectory_control": 1.0
+				})
 
 			merged_data["phases"] = new_phases
 	
