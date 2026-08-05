@@ -29,7 +29,7 @@ shared/video_config.schema.json
 Schema v1.0 hien validate cac mode:
 
 ```text
-game_mode = circle_bounce | polygon_bounce
+game_mode = circle_bounce | polygon_bounce | circle_puzzle | polygon_puzzle
 ```
 
 Schema hien tai nen dam bao common fields:
@@ -45,14 +45,15 @@ Schema hien tai nen dam bao common fields:
 - `visual.background_color` va `visual.ball_color` la hex color.
 - `visual.trail_mode` chi ho tro `short`, `long`, `web` cho `circle_bounce`.
 - `visual.trail_persistence` nam trong 0 den 1.
+- `visual.show_progress_bar` la boolean (ho tro bat/tat thanh tien trinh).
 - `phases` co it nhat 1 item.
 
-Schema hien tai nen dam bao `circle_bounce` va `polygon_bounce` gameplay fields:
+Schema hien tai nen dam bao `circle_bounce`, `polygon_bounce`, `circle_puzzle` va `polygon_puzzle` gameplay fields:
 
 - `gameplay.ball.start_radius`, `max_radius`, `max_speed` lon hon 0.
 - `gameplay.ball.growth_per_hit >= 1`.
 - `gameplay.ball.speed_growth_per_hit >= 1`.
-- `gameplay.arena.type = circle` (circle_bounce) hoac `square | pentagon | hexagon` (polygon_bounce).
+- `gameplay.arena.type = circle` (circle_bounce / circle_puzzle) hoac `square | pentagon | hexagon` (polygon_bounce / polygon_puzzle).
 - `gameplay.arena.radius > 0`.
 - `gameplay.arena.line_width >= 0`.
 - `gameplay.arena.sides >= 3` va `<= 12` (polygon_bounce).

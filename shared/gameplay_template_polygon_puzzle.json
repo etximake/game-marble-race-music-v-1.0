@@ -52,7 +52,8 @@
     "ball_icon_path": "",
     "icon_silhouette_mode": false,
     "icon_reveal_phase": "intro",
-    "icon_rotation_mode": "none"
+    "icon_rotation_mode": "none",
+    "show_progress_bar": true
   },
   "quiz": {
     "enabled": true,

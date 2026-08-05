@@ -44,7 +44,7 @@ timeline
 ## game_mode
 
 ```json
-"circle_bounce"
+"circle_puzzle"
 ```
 
 `game_mode` cho Godot biet phai tao mode controller/view nao.
@@ -52,8 +52,8 @@ timeline
 Cac mode hien tai duoc ho tro:
 - `"circle_bounce"`: arena tron
 - `"polygon_bounce"`: arena da giac (vuong, ngu giac, luc giac)
-
-MVP v1.0 chi validate `circle_bounce`, nhung kien truc Godot khong duoc hard-code moi runtime theo ball/circle.
+- `"circle_puzzle"`: arena tron ket hop dia nhac doan ten bai hat (Puzzle mode)
+- `"polygon_puzzle"`: arena da giac ket hop dia nhac doan ten bai hat (Puzzle mode)
 
 ## video
 
@@ -172,17 +172,43 @@ Y nghia:
   "use_rainbow_trail": true,
   "trail_mode": "web",
   "trail_persistence": 1.0,
-  "impact_effect": true
+  "impact_effect": true,
+  "use_ball_icon": false,
+  "ball_icon_path": "",
+  "icon_silhouette_mode": false,
+  "icon_reveal_phase": "intro",
+  "icon_rotation_mode": "none",
+  "show_progress_bar": false
 }
 ```
 
 `visual` la visual setting chung va co the duoc active mode dien giai theo cach rieng.
 
 Voi `circle_bounce`, `trail_mode` nen ho tro:
-
 - `short`
 - `long`
 - `web`
+
+Truong visual ho tro them cac thuoc tinh cho Ball Icon / Quiz / Progress Bar:
+- `use_ball_icon`: Bieu thi dung texture/image tren ball thay vi draw don sac.
+- `ball_icon_path`: Duong dan toi file anh ball.
+- `icon_silhouette_mode`: Khi true, ball se hien thi silhouette mau den bi an (quiz mode).
+- `icon_reveal_phase`: Phase hien thi mau thuc te cua icon.
+- `icon_rotation_mode`: Cach thuc xoay icon (`none`, `velocity`, `spin`).
+- `show_progress_bar`: Bat/tat thanh tien trinh progress bar o day man hinh.
+
+## quiz
+
+```json
+{
+  "enabled": true,
+  "prompt": "Guess this song from\n the satisfying beats! ✨",
+  "reveal_time": 20.0,
+  "reveal_style": "text_only"
+}
+```
+
+Dung de dieu khien che do puzzle va hien thi Header quiz doan ten bai hat.
 
 ## text
 

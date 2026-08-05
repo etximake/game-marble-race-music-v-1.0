@@ -64,7 +64,24 @@ Python validate Job Music JSON bang:
 shared/video_config.schema.json
 ```
 
-Validator kiem tra duration, danh sach notes va index lien tuc. Gameplay va phase duoc validate sau khi Godot merge voi template.
+Validator kiem tra duration (tu 1.0 den 60.0 giay), danh sach notes, index lien tuc, va truong `quiz` (neu co). Gameplay va phase duoc validate sau khi Godot merge voi template.
+
+## Quiz settings
+
+Doi voi che do Puzzle, file JSON sinh ra chua thong tin quiz dung de dieu khien hien thi cau hoi/dap an va qua trinh mo cac manh ghep dia than:
+
+```json
+"quiz": {
+  "prompt": "Guess this song from\n the satisfying beats! ✨",
+  "reveal_time": 20.0,
+  "enabled": true
+}
+```
+
+Trong do:
+- `prompt`: cau hoi doan ten bai hat hien thi tai Header.
+- `reveal_time`: thoi diem tu dong mo toan bo dia nhac (mac dinh bang `duration - 6.0` doi voi Puzzle).
+- `enabled`: bat/tat tinh nang quiz.
 
 ## Short video profile
 

@@ -76,32 +76,24 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 			var game_mode = str(merged_data.get("game_mode", ""))
 			var is_puzzle = "puzzle" in game_mode
 			
-			# Tự động đồng bộ hoá reveal_time đúng bằng mốc thời gian nhạc tắt (duration - 6s đối với Puzzle)
-			var reveal_time = duration
+			# Tách biệt cấu hình theo từng mode như cũ
+			var buildup_end = 10.0
+			var climax_growth = 10.0 # Mặc định cho Bounce gốc bóng phình to tối đa
+			
 			if is_puzzle:
-				reveal_time = duration - 6.0
-				if reveal_time < duration * 0.70:
-					reveal_time = duration * 0.70 # fallback
-			else:
-				# Nhóm Bounce thường thì kết thúc ở điểm cuối video
-				reveal_time = duration
+				buildup_end = 8.0
+				climax_growth = 1.0 # Chế độ Puzzle bóng giữ nguyên kích thước để xem ảnh Album Art
+			
+			var reveal_time = duration - 6.0
+			if reveal_time < duration * 0.70:
+				reveal_time = duration * 0.70 # fallback
 				
 			if merged_data.has("quiz") and typeof(merged_data["quiz"]) == TYPE_DICTIONARY:
 				var quiz = merged_data["quiz"] as Dictionary
 				quiz["reveal_time"] = reveal_time
 
-			# Thiết kế mốc thời gian cho 4 Phase (đảm bảo cả 4 mode game):
-			# Chế độ puzzle:
-			# - intro: 0.0s -> 2.0s
-			# - build_up: 2.0s -> 8.0s
-			# - final_storm: 8.0s -> reveal_time (18.6s đối với bài 24s)
-			# - climax_storm: reveal_time -> duration (6s cuối tĩnh phát nhạc gốc)
-			# Chế độ thường:
-			# - intro: 0.0s -> 2.0s
-			# - build_up: 2.0s -> 10.0s
-			# - final_storm: 10.0s -> duration
+			# Thiết kế mốc thời gian cho các Phase:
 			var intro_end = 2.0
-			var buildup_end = 8.0 if is_puzzle else 10.0
 			if duration < 12.0:
 				intro_end = duration * 0.2
 				buildup_end = duration * 0.5
@@ -131,39 +123,27 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 				"trajectory_control": 0.5
 			})
 
-			if is_puzzle:
-				# Phase 3: final_storm (Lật mở mảnh)
-				new_phases.append({
-					"name": "final_storm",
-					"start_time": buildup_end,
-					"end_time": reveal_time,
-					"speed_multiplier": 3.5,
-					"growth_multiplier": 4.0,
-					"trail_multiplier": 3.0,
-					"trajectory_control": 1.0
-				})
-				
-				# Phase 4: climax_storm (6 giây cuối công bố đáp án tĩnh, bóng bay tự do siêu tốc)
-				new_phases.append({
-					"name": "climax_storm",
-					"start_time": reveal_time,
-					"end_time": duration,
-					"speed_multiplier": 10.0,
-					"growth_multiplier": 1.0, # Không phát triển bóng to thêm nữa để giữ chỗ xem ảnh
-					"trail_multiplier": 3.5,
-					"trajectory_control": 1.0
-				})
-			else:
-				# Chế độ thường: final_storm kéo dài đến hết video
-				new_phases.append({
-					"name": "final_storm",
-					"start_time": buildup_end,
-					"end_time": duration,
-					"speed_multiplier": 3.5,
-					"growth_multiplier": 4.0,
-					"trail_multiplier": 3.0,
-					"trajectory_control": 1.0
-				})
+			# Phase 3: final_storm (Lật mở mảnh / ẩn đáp án)
+			new_phases.append({
+				"name": "final_storm",
+				"start_time": buildup_end,
+				"end_time": reveal_time,
+				"speed_multiplier": 3.5,
+				"growth_multiplier": 4.0,
+				"trail_multiplier": 3.0,
+				"trajectory_control": 1.0
+			})
+			
+			# Phase 4: climax_storm (6 giây cuối công bố đáp án và hé lộ ảnh)
+			new_phases.append({
+				"name": "climax_storm",
+				"start_time": reveal_time,
+				"end_time": duration,
+				"speed_multiplier": 10.0,
+				"growth_multiplier": climax_growth, # Phân tách theo mode chơi như cũ
+				"trail_multiplier": 3.5,
+				"trajectory_control": 1.0
+			})
 
 			merged_data["phases"] = new_phases
 	

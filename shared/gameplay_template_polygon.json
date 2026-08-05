@@ -50,7 +50,8 @@
     "ball_icon_path": "",
     "icon_silhouette_mode": true,
     "icon_reveal_phase": "final_storm",
-    "icon_rotation_mode": "none"
+    "icon_rotation_mode": "none",
+    "show_progress_bar": true
   },
   "quiz": {
     "enabled": true,

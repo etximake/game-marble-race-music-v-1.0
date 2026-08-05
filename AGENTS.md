@@ -23,18 +23,26 @@
 
 ## Planned Layout
 
-- Scenes: `scenes/Main.tscn`, `scenes/AudioNotePlayer.tscn`, `scenes/UIOverlay.tscn`; mode scenes nằm dưới `scenes/modes/circle_bounce/`.
-- Scripts: `scripts/domain/`, `scripts/application/`, `scripts/infrastructure/`, `scripts/presentation/` với code của mode cụ thể nằm ở thư mục modes tương ứng.
+- Scenes: `scenes/Main.tscn`, `scenes/AudioNotePlayer.tscn`, `scenes/UIOverlay.tscn`; mode scenes nằm dưới `scenes/modes/`.
+- Scripts: `scripts/domain/`, `scripts/application/`, `scripts/infrastructure/`, `scripts/presentation/` với code của mode cụ thể nằm ở thư mục modes tương ứng (circle_bounce, polygon_bounce, circle_puzzle, polygon_puzzle).
 
-## Simulation Rules (circle_bounce)
+## Simulation & Puzzle Rules
 
-- Vòng tròn va chạm: `distance(ball.position, arena.center) + ball.radius >= arena.radius`.
-- **Trọng lực mô phỏng (Y-axis Gravity Simulation)**: Tốc độ bóng tự động nhân thêm hệ số trục Y tức thời trong `update_position` (bay xuống tăng tốc tối đa +17.5%, bay lên giảm tốc tối đa -15%). Đường bay luôn giữ thẳng tuyệt đối.
-- **Bóp góc phản xạ hướng tâm (Decaying Angle of Incidence)**:
-  - Va chạm đầu tiên bẻ góc lớn (`1.25 rad` ~71.6°) để tạo đa giác nhiều cạnh.
-  - Các va chạm tiếp theo tự động bóp góc phản xạ hướng tâm theo hệ số `decay_rate = lerp(0.008, 0.08, current_time / duration)` để đa giác giảm dần cạnh và trở thành đường thẳng xuyên tâm ở cuối bài hát.
-- **Bù nhịp nhạc hình học (Geometric Tempo Compensation)**: Nhân vận tốc thực tế sau va chạm với `cos(theta)` (clamped `0.45` đến `1.0`) để giữ khoảng cách nhịp nốt nhạc va chạm luôn đồng đều/dồn dập mượt mà, bù đắp cho quãng đường bay dài khi xuyên tâm.
-- Cooldown va chạm: `20 ms` (COLLISION_COOLDOWN_MS = 20.0).
+- **Simulation Rules (circle_bounce / polygon_bounce)**:
+  - Vòng tròn va chạm: `distance(ball.position, arena.center) + ball.radius >= arena.radius`.
+  - Va chạm đa giác: Tìm điểm gần nhất trên các cạnh của đa giác.
+  - **Trọng lực mô phỏng (Y-axis Gravity Simulation)**: Tốc độ bóng tự động nhân thêm hệ số trục Y tức thời trong `update_position` (bay xuống tăng tốc tối đa +17.5%, bay lên giảm tốc tối đa -15%). Đường bay luôn giữ thẳng tuyệt đối.
+  - **Bóp góc phản xạ hướng tâm (Decaying Angle of Incidence)**:
+    - Va chạm đầu tiên bẻ góc lớn (`1.25 rad` ~71.6°) để tạo đa giác nhiều cạnh.
+    - Các va chạm tiếp theo tự động bóp góc phản xạ hướng tâm theo hệ số `decay_rate = lerp(0.008, 0.08, current_time / duration)` để đa giác giảm dần cạnh và trở thành đường thẳng xuyên tâm ở cuối bài hát.
+  - **Bù nhịp nhạc hình học (Geometric Tempo Compensation)**: Nhân vận tốc thực tế sau va chạm với `cos(theta)` (clamped `0.45` hoặc `0.75` đến `1.0` tùy mode) để giữ khoảng cách nhịp nốt nhạc va chạm luôn đồng đều/dồn dập mượt mà, bù đắp cho quãng đường bay dài khi xuyên tâm.
+  - Cooldown va chạm: `20 ms` (COLLISION_COOLDOWN_MS = 20.0).
+
+- **Puzzle Mode Rules (circle_puzzle / polygon_puzzle)**:
+  - **Đĩa nhạc vinyl (PuzzleGridOverlay)**: Đặt ở tâm Y=1080, đường kính 640px, tự động xoay góc 15 độ/giây. Gồm 8 mảnh hình quạt được che phủ bởi màu tối. Khi bóng va chạm, mảnh ghép tại góc va chạm cục bộ tương ứng sẽ chớp hé (flash) lộ ảnh bìa và mờ dần về tối trong 0.22s - 0.45s tùy phase (chớp 1 mảnh ở intro, 2 mảnh ở build_up, 3 mảnh ở final_storm). Đồng thời phủ thêm lớp sáng neon trùng màu bóng trong 30% thời gian đầu. Mở toàn bộ đĩa nhạc tại mốc `reveal_time` (mặc định `duration - 6.0` giây).
+  - **Thanh tiến trình (PuzzleProgressBar)**: Căn giữa Y=1680, rộng 800px. fill_ratio nội suy tuyến tính đến mốc `reveal_time`. Sinh hạt lửa (sparks) neon bay lùi về sau. Khi phát note (`note_triggered`), thanh progress giật phồng lên 1.15 lần và co lại mượt mà trong 0.15 giây.
+  - **Trật tự hiển thị (Z-Index Layout)**: TrailRenderer (`z_index = 1`) -> PuzzleGridOverlay (`z_index = 2`) -> BallView (`z_index = 5`). Bóng di chuyển trên đĩa than nhưng vệt sáng lướt ẩn bên dưới đĩa than.
+  - **Đa giác ngẫu nhiên (polygon_puzzle)**: Số lượng cạnh đa giác đấu trường được chọn ngẫu nhiên `[4, 5, 6]` tại thời điểm setup.
 
 ## Audio Rules
 

@@ -79,15 +79,20 @@ func handle_mode_event(event):
 			arena_view.flash_at(info.position, ring_color, info.normal, current_phase_name)
 			ball_view.trigger_pulse(current_phase_name)
 
+			if puzzle_grid:
+				var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
+				if controller.current_time >= puzzle_duration:
+					puzzle_grid.reveal_all()
+				elif controller.current_time >= 3.0:
+					var angle = (info.position - puzzle_grid.center_offset).angle()
+					puzzle_grid.flash_slice_at_angle(angle, controller.current_time, phases, ring_color)
+
 	elif event.type == "note_triggered":
 		note_count += 1
 		if puzzle_grid:
 			var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
-			# Nếu đã bước sang 6s cuối, tự động lật mở hoàn toàn đĩa tròn
 			if controller.current_time >= puzzle_duration:
 				puzzle_grid.reveal_all()
-			elif controller.current_time >= 3.0: # Giới hạn bắt đầu mở mảnh ghép từ giây thứ 3.0 trở đi
-				puzzle_grid.reveal_by_phase(controller.current_time, puzzle_duration, phases)
 			
 			if progress_bar:
 				# Hiệu ứng nảy thanh tiến trình theo nhịp nốt nhạc (beat pulse)

@@ -18,6 +18,10 @@ var spin_angle: float = 0.0
 var show_glow: bool = false
 var glow_timer: float = 0.0
 
+var flash_timers: Array = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+var flash_durations: Array = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+var last_flash_color: Color = Color.WHITE
+
 # Vết đĩa than
 var center_offset: Vector2 = Vector2(540, 1080)
 
@@ -28,6 +32,10 @@ func setup(p_image_path: String, p_top_text: String, p_job_folder: String):
 	revealed.clear()
 	for i in range(REVEAL_SLICES):
 		revealed.append(false)
+
+	flash_timers = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	flash_durations = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	last_flash_color = Color.WHITE
 
 	# Bỏ hoàn toàn top_text và answer_label đè lên ảnh (Main UI đã hiển thị ở Header)
 	if p_image_path != "":
@@ -83,6 +91,60 @@ func reveal_by_phase(current_time: float, duration: float, phases: Array):
 		reveal_target += 1
 		reveal_cells(1)
 
+func flash_slice_at_angle(collision_angle: float, current_time: float, phases: Array, flash_color: Color):
+	if is_complete:
+		return
+
+	# Xác định phase hiện tại
+	var phase_idx = 0
+	if not phases.is_empty():
+		for p in range(phases.size()):
+			var end_time = float(phases[p].get("end_time", 0.0))
+			if current_time >= end_time:
+				phase_idx = p
+
+	var phase_name = ""
+	if not phases.is_empty() and phase_idx < phases.size():
+		phase_name = phases[phase_idx].get("name", "")
+
+	# Thời gian mờ dần tùy chỉnh theo phase (lâu hơn ở intro, nhanh dần ở final_storm)
+	var duration = 0.35
+	var count = 1
+	if phase_name == "intro":
+		duration = 0.45
+		count = 1
+	elif phase_name == "build_up":
+		duration = 0.35
+		count = 2
+	elif phase_name == "final_storm":
+		duration = 0.22
+		count = 3
+	else:
+		duration = 0.22
+		count = 3
+
+	# Chuyển đổi góc va chạm sang hệ tọa độ cục bộ của đĩa nhạc đang xoay
+	# spin_angle quay theo chiều kim đồng hồ, nên góc cục bộ là collision_angle - spin_angle
+	var local_angle = collision_angle - spin_angle
+	local_angle = wrapf(local_angle, 0.0, TAU)
+
+	var slice_angle = TAU / REVEAL_SLICES
+	var center_slice = int(local_angle / slice_angle) % REVEAL_SLICES
+
+	last_flash_color = flash_color
+
+	# Kích hoạt chớp sáng cho center_slice và các mảnh lân cận tùy theo count
+	var slices_to_flash = []
+	slices_to_flash.append(center_slice)
+	if count >= 2:
+		slices_to_flash.append((center_slice + 1) % REVEAL_SLICES)
+	if count >= 3:
+		slices_to_flash.append((center_slice - 1 + REVEAL_SLICES) % REVEAL_SLICES)
+
+	for idx in slices_to_flash:
+		flash_timers[idx] = duration
+		flash_durations[idx] = duration
+
 func reveal_all():
 	for i in range(total_cells):
 		revealed[i] = true
@@ -99,6 +161,12 @@ func _process(delta: float):
 	spin_angle += deg_to_rad(15.0) * delta
 	if spin_angle > TAU:
 		spin_angle -= TAU
+
+	for i in range(REVEAL_SLICES):
+		if flash_timers[i] > 0.0:
+			flash_timers[i] -= delta
+			if flash_timers[i] < 0.0:
+				flash_timers[i] = 0.0
 
 	if show_glow:
 		glow_timer -= delta
@@ -148,10 +216,25 @@ func _draw():
 					var a = start_a + (end_a - start_a) * (float(step) / float(steps))
 					points.append(Vector2(cos(a), sin(a)) * label_r)
 				
+				# Tính toán alpha của lớp phủ dựa trên flash timer
+				var overlay_alpha = 1.0
+				if flash_timers[i] > 0.0 and flash_durations[i] > 0.0:
+					var t = flash_timers[i] / flash_durations[i] # 1.0 -> 0.0
+					overlay_alpha = lerpf(1.0, 0.0, t)
+				
 				# Phủ màu đen mờ che ảnh
-				draw_polygon(points, PackedColorArray([Color(0.08, 0.08, 0.1, 0.98)]))
+				draw_polygon(points, PackedColorArray([Color(0.05, 0.05, 0.07, overlay_alpha)]))
+				
+				# Nếu đang trong thời gian đầu flash (30% đầu tiên), vẽ thêm lớp màu neon nháy sáng
+				if flash_timers[i] > 0.0 and flash_durations[i] > 0.0:
+					var t = flash_timers[i] / flash_durations[i]
+					if t > 0.7:
+						var neon_strength = (t - 0.7) / 0.3
+						var glow_color_mod = Color(last_flash_color.r, last_flash_color.g, last_flash_color.b, neon_strength * 0.45)
+						draw_polygon(points, PackedColorArray([glow_color_mod]))
+				
 				# Vẽ đường line chia các mảnh
-				draw_line(Vector2.ZERO, Vector2(cos(start_a), sin(start_a)) * label_r, Color(0.02, 0.02, 0.04, 0.5), 1.5, true)
+				draw_line(Vector2.ZERO, Vector2(cos(start_a), sin(start_a)) * label_r, Color(0.02, 0.02, 0.04, 0.5 * overlay_alpha), 1.5, true)
 		
 		# Reset lại transform về mặc định
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

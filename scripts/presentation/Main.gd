@@ -8,7 +8,7 @@ extends Node
 
 var config_path: String = "res://generated/jobs/job_002/video_config.json"
 var template_path: String = ""
-var selected_mode: String = "circle_puzzle"
+var selected_mode: String = "circle_bounce"
 var job_folder: String = ""
 var video_config: VideoConfig
 var active_mode_view: Node2D
@@ -89,7 +89,8 @@ func _load_and_start():
 		return
 	
 	# Setup UI Overlay
-	ui_overlay.setup(video_config.get_text_config())
+	var is_puzzle = "puzzle" in mode_name
+	ui_overlay.setup(video_config.get_text_config(), is_puzzle)
 	var visual_config = video_config.get_visual_config().duplicate(true)
 	var job_assets = video_config.get_job_assets()
 	if job_assets.has("ball_icon_path"):

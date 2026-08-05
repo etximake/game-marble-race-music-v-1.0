@@ -44,7 +44,7 @@ Tại runtime, `ConfigLoader.gd` thực hiện:
 
 ## 2. Quy trình Thêm một Game Mode mới
 
-Dự án hỗ trợ 2 game mode: `circle_bounce` (arena tròn) và `polygon_bounce` (arena đa giác). Để thêm một game mode mới, bạn thực hiện theo 5 bước sau:
+Dự án hỗ trợ 4 game mode: `circle_bounce` (arena tròn), `polygon_bounce` (arena đa giác), `circle_puzzle` (arena tròn kết hợp đĩa nhạc đoán bài hát) và `polygon_puzzle` (arena đa giác kết hợp đĩa nhạc đoán bài hát). Để thêm một game mode mới, bạn thực hiện theo 5 bước sau:
 
 ### Bước 1: Khai báo cấu trúc dữ liệu (Domain State)
 Tạo thư mục `scripts/domain/modes/<mode_name>/`. Tạo các file chứa trạng thái của mode đó:
@@ -84,7 +84,7 @@ Mặc dù hệ thống chỉ chạy duy nhất một chế độ chơi tại m�
 Các bước thực hiện đăng ký:
 1. Mở `scripts/application/GameModeRegistry.gd`, thêm tên mode vào mảng hỗ trợ:
    ```gdscript
-   const SUPPORTED_MODES = ["circle_bounce", "polygon_bounce"]
+   const SUPPORTED_MODES = ["circle_bounce", "polygon_bounce", "circle_puzzle", "polygon_puzzle"]
    ```
 2. Mở `scripts/application/GameModeFactory.gd`, đăng ký Controller và View Scene tương ứng:
    ```gdscript
@@ -93,7 +93,15 @@ Các bước thực hiện đăng ký:
            "circle_bounce":
                ...
            "polygon_bounce":
-               var script = load("res://scripts/application/modes/polygon_bounce/PolygonBounceModeController.gd")
+               ...
+           "circle_puzzle":
+               var script = load("res://scripts/application/modes/circle_puzzle/CirclePuzzleModeController.gd")
+               if script:
+                   var controller = script.new()
+                   controller.setup(gameplay_config)
+                   return controller
+           "polygon_puzzle":
+               var script = load("res://scripts/application/modes/polygon_puzzle/PolygonPuzzleModeController.gd")
                if script:
                    var controller = script.new()
                    controller.setup(gameplay_config)
@@ -106,6 +114,10 @@ Các bước thực hiện đăng ký:
                return "res://scenes/modes/circle_bounce/CircleBounceMode.tscn"
            "polygon_bounce":
                return "res://scenes/modes/polygon_bounce/PolygonBounceMode.tscn"
+           "circle_puzzle":
+               return "res://scenes/modes/circle_puzzle/CirclePuzzleMode.tscn"
+           "polygon_puzzle":
+               return "res://scenes/modes/polygon_puzzle/PolygonPuzzleMode.tscn"
        return ""
    ```
 
@@ -152,6 +164,7 @@ Game mode và các thông số vật lý (tốc độ bóng, bán kính tối đ
       - `"icon_silhouette_mode"`: Khi bật `true`, quả bóng sẽ hiển thị bóng đen đơn sắc bí ẩn phục vụ cho thể loại video Quiz đoán nhân vật.
       - `"icon_reveal_phase"`: Giai đoạn hé lộ màu sắc thật của ảnh icon (mặc định `"final_storm"`).
       - `"icon_rotation_mode"`: Cách thức xoay ảnh: `"none"` (giữ thẳng đứng), `"velocity"` (xoay mặt theo hướng di chuyển của bóng), hoặc `"spin"` (tự động xoay tròn liên tục).
+      - `"show_progress_bar"`: Bật/tắt thanh tiến trình nhạc nhấp nháy theo nhịp ở đáy màn hình (Y=1680) cho các chế độ chơi. Mặc định `true` cho chế độ Puzzle, và `false` cho chế độ Bounce thông thường (có thể bật tùy chọn).
     - Tất cả các Job nhạc khi chạy sẽ tự động thừa hưởng cấu hình chung này.
 
 ---

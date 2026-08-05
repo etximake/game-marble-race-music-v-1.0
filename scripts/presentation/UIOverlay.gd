@@ -10,7 +10,7 @@ var is_showing_answer: bool = false
 var blink_timer: float = 0.0
 var original_bottom_text: String = ""
 
-func setup(text_config: Dictionary):
+func setup(text_config: Dictionary, is_puzzle: bool = false):
 	var show_text = text_config.get("show_text", true)
 	visible = show_text
 	is_showing_answer = false
@@ -26,8 +26,8 @@ func setup(text_config: Dictionary):
 		top_label.add_theme_font_size_override("font_size", 52)
 		top_label.scale = Vector2.ONE
 		
-		# Ẩn bottom_label ở giai đoạn đầu game để sạch sẽ, chỉ hiện khi công bố đáp án
-		bottom_label.visible = false
+		# Ẩn bottom_label ở giai đoạn đầu game để sạch sẽ đối với Puzzle, hiện từ đầu đối với Bounce
+		bottom_label.visible = not is_puzzle
 		
 		# Set custom fonts or sizes if needed, or stick to defaults
 		top_label.visible = top_label.text != ""
