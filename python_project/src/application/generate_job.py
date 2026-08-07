@@ -97,6 +97,38 @@ class GenerateJobUseCase:
             quiz_data["reveal_time"] = music_duration - 6.0 if is_puzzle else music_duration
             quiz_data["enabled"] = True
 
+            if is_puzzle:
+                correct_song = "Cupid - Fifty Fifty"
+                if custom_text and custom_text.get("song_name"):
+                    correct_song = custom_text.get("song_name")
+                
+                decoys = [
+                    "Stay - The Kid LAROI",
+                    "Blinding Lights - The Weeknd",
+                    "As It Was - Harry Styles",
+                    "Bad Guy - Billie Eilish",
+                    "Flowers - Miley Cyrus",
+                    "Faded - Alan Walker",
+                    "Alone - Marshmello",
+                    "Believer - Imagine Dragons",
+                    "The Nights - Avicii",
+                    "Animals - Martin Garrix",
+                    "Flowers - Miley Cyrus",
+                    "Levitating - Dua Lipa"
+                ]
+                # Filter out the correct song
+                decoys = [d for d in decoys if d.lower() != correct_song.lower()]
+                
+                import random
+                r = random.Random(job_id)
+                selected_decoys = r.sample(decoys, min(len(decoys), 2))
+                
+                options = selected_decoys + [correct_song]
+                r.shuffle(options)
+                
+                quiz_data["options"] = options
+                quiz_data["correct_index"] = options.index(correct_song)
+
             video_config = self.video_config_generator.execute(
                 metadata=norm_metadata,
                 note_clips=note_clips,

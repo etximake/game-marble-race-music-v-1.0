@@ -7,14 +7,8 @@
   },
   "gameplay": {
     "ball": {
-      "start_position": [
-        540.0,
-        635.0
-      ],
-      "start_velocity": [
-        0.0,
-        600.0
-      ],
+      "start_position": [540.0, 375.0],
+      "start_velocity": [0.0, 600.0],
       "start_radius": 24.0,
       "max_radius": 320.0,
       "max_radius_ratio": 0.55,
@@ -24,10 +18,7 @@
       "tempo_compensation_min": 0.75
     },
     "arena": {
-      "center": [
-        540,
-        1080
-      ],
+      "center": [540, 820],
       "radius": 470.0,
       "line_width": 8.0
     },
@@ -55,8 +46,10 @@
   },
   "quiz": {
     "enabled": true,
-    "prompt": "Đoán tên bài hát này!",
-    "reveal_style": "text_only"
+    "prompt": "Doan ten bai hat nay!",
+    "reveal_style": "text_only",
+    "options": [],
+    "correct_index": 0
   },
   "timeline": {
     "intro_duration_seconds": 2.0,

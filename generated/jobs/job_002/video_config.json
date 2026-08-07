@@ -272,6 +272,12 @@
   "quiz": {
     "prompt": "Guess this song from \n the satisfying beats! \u2728",
     "reveal_time": 18.674,
-    "enabled": true
+    "enabled": true,
+    "options": [
+      "Cupid - Fifty Fifty",
+      "As It Was - Harry Styles",
+      "Bad Guy - Billie Eilish"
+    ],
+    "correct_index": 0
   }
 }

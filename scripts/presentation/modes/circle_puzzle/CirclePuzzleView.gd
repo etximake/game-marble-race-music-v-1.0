@@ -14,6 +14,8 @@ var note_count: int = 0
 var quiz_config: Dictionary = {}
 var phases: Array = []
 var duration: float = 30.0
+var puzzle_duration: float = 20.0
+var countdown_started: bool = false
 
 func setup(p_controller, p_visual_config, job_folder = "", phases = [], p_quiz_config = {}):
 	controller = p_controller
@@ -25,6 +27,10 @@ func setup(p_controller, p_visual_config, job_folder = "", phases = [], p_quiz_c
 	if not self.phases.is_empty():
 		duration = float(self.phases[-1].get("end_time", 30.0))
 
+	puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
+	if puzzle_duration < duration * 0.70:
+		puzzle_duration = duration * 0.70
+
 	arena_view.suppress_climax_fade = true
 	arena_view.setup(controller.state.arena, visual_config, controller, phases)
 	arena_view.set_ball_reference(ball_view)
@@ -34,28 +40,23 @@ func setup(p_controller, p_visual_config, job_folder = "", phases = [], p_quiz_c
 
 	var ball_icon_path = visual_config.get("ball_icon_path", "")
 	var top_text = p_quiz_config.get("prompt", "")
-	puzzle_grid.setup(ball_icon_path, top_text, job_folder)
+	puzzle_grid.setup(ball_icon_path, top_text, job_folder, puzzle_duration, duration)
 
-	# Chỉnh vị trí Z-index để ẩn Trail dưới đĩa than tròn nhưng bóng nổi lên trên
-	# Arena: z_index = 0
-	# TrailRenderer: z_index = 1
-	# PuzzleGrid (Đĩa than): z_index = 2
-	# Ball (Bóng): z_index = 5
 	trail_renderer.z_index = 1
 	puzzle_grid.z_index = 2
 	ball_view.z_index = 5
 
 	progress_bar.setup()
+	countdown_started = false
 
 func _process(delta):
 	if controller and ball_view:
 		ball_view.time_elapsed = controller.current_time
-		
-		# Đồng bộ hoá ProgressBar và Puzzle đầy mượt mà (Linear Interpolation)
-		var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
+		puzzle_grid.current_time = controller.current_time
+
 		if progress_bar:
 			progress_bar.fill_ratio = clampf(controller.current_time / puzzle_duration, 0.0, 1.0)
-			
+
 		if controller.current_time >= puzzle_duration:
 			if puzzle_grid and not puzzle_grid.is_complete:
 				puzzle_grid.reveal_all()
@@ -80,7 +81,6 @@ func handle_mode_event(event):
 			ball_view.trigger_pulse(current_phase_name)
 
 			if puzzle_grid:
-				var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
 				if controller.current_time >= puzzle_duration:
 					puzzle_grid.reveal_all()
 				elif controller.current_time >= 3.0:
@@ -90,10 +90,16 @@ func handle_mode_event(event):
 	elif event.type == "note_triggered":
 		note_count += 1
 		if puzzle_grid:
-			var puzzle_duration = float(quiz_config.get("reveal_time", duration - 6.0))
 			if controller.current_time >= puzzle_duration:
 				puzzle_grid.reveal_all()
-			
+
 			if progress_bar:
-				# Hiệu ứng nảy thanh tiến trình theo nhịp nốt nhạc (beat pulse)
 				progress_bar.trigger_pulse()
+
+func trigger_climax_effects():
+	if puzzle_grid:
+		puzzle_grid.reveal_all_with_animation()
+	if arena_view:
+		var ring_color = Color.from_string(visual_config.get("ball_color", "#00ffcc"), Color.WHITE)
+		arena_view.flash_at(puzzle_grid.center_offset, ring_color, Vector2.UP, "climax_storm")
+		arena_view.flash_at(puzzle_grid.center_offset, ring_color, Vector2.DOWN, "climax_storm")

@@ -83,6 +83,15 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 			if is_puzzle:
 				buildup_end = 8.0
 				climax_growth = 1.0 # Chế độ Puzzle bóng giữ nguyên kích thước để xem ảnh Album Art
+				# Tối ưu hóa bố cục Y cho các chế độ Puzzle tránh đè đĩa nhạc và đáp án (tâm dịch xuống Y=1060)
+				if merged_data.has("gameplay") and typeof(merged_data["gameplay"]) == TYPE_DICTIONARY:
+					var gp = merged_data["gameplay"] as Dictionary
+					if gp.has("arena") and typeof(gp["arena"]) == TYPE_DICTIONARY:
+						var ar = gp["arena"] as Dictionary
+						ar["center"] = [540, 1060]
+					if gp.has("ball") and typeof(gp["ball"]) == TYPE_DICTIONARY:
+						var bl = gp["ball"] as Dictionary
+						bl["start_position"] = [540.0, 615.0]
 			
 			var reveal_time = duration - 6.0
 			if reveal_time < duration * 0.70:
@@ -97,51 +106,90 @@ static func load_config(file_path: String, template_path: String = "") -> Dictio
 			if duration < 12.0:
 				intro_end = duration * 0.2
 				buildup_end = duration * 0.5
+			elif is_puzzle:
+				# Rút ngắn intro cho puzzle để có nhịp điệu nhanh ngay từ đầu
+				intro_end = 0.8
 
 			# Clear existing template phases and dynamically construct our phase sequence
 			var new_phases = []
 			
-			# Phase 1: intro
-			new_phases.append({
-				"name": "intro",
-				"start_time": 0.0,
-				"end_time": intro_end,
-				"speed_multiplier": 1.0,
-				"growth_multiplier": 1.0,
-				"trail_multiplier": 1.5,
-				"trajectory_control": 0.0
-			})
+			if is_puzzle:
+				# Cấu hình nhịp nhanh thỏa mãn ngay từ 3 giây đầu cho Puzzle
+				# Phase 1: intro (0 - 0.8s)
+				new_phases.append({
+					"name": "intro",
+					"start_time": 0.0,
+					"end_time": intro_end,
+					"speed_multiplier": 2.0,
+					"growth_multiplier": 1.2,
+					"trail_multiplier": 2.0,
+					"trajectory_control": 0.0
+				})
 
-			# Phase 2: build_up
-			new_phases.append({
-				"name": "build_up",
-				"start_time": intro_end,
-				"end_time": buildup_end,
-				"speed_multiplier": 2.0,
-				"growth_multiplier": 2.0,
-				"trail_multiplier": 2.0,
-				"trajectory_control": 0.5
-			})
+				# Phase 2: build_up (0.8s - 8.0s)
+				new_phases.append({
+					"name": "build_up",
+					"start_time": intro_end,
+					"end_time": buildup_end,
+					"speed_multiplier": 3.2,
+					"growth_multiplier": 2.0,
+					"trail_multiplier": 2.5,
+					"trajectory_control": 0.5
+				})
 
-			# Phase 3: final_storm (Lật mở mảnh / ẩn đáp án)
-			new_phases.append({
-				"name": "final_storm",
-				"start_time": buildup_end,
-				"end_time": reveal_time,
-				"speed_multiplier": 3.5,
-				"growth_multiplier": 4.0,
-				"trail_multiplier": 3.0,
-				"trajectory_control": 1.0
-			})
+				# Phase 3: final_storm (8.0s - reveal_time)
+				new_phases.append({
+					"name": "final_storm",
+					"start_time": buildup_end,
+					"end_time": reveal_time,
+					"speed_multiplier": 4.8,
+					"growth_multiplier": 4.0,
+					"trail_multiplier": 3.5,
+					"trajectory_control": 1.0
+				})
+			else:
+				# Cấu hình cho Bounce gốc
+				# Phase 1: intro
+				new_phases.append({
+					"name": "intro",
+					"start_time": 0.0,
+					"end_time": intro_end,
+					"speed_multiplier": 1.0,
+					"growth_multiplier": 1.0,
+					"trail_multiplier": 1.5,
+					"trajectory_control": 0.0
+				})
+
+				# Phase 2: build_up
+				new_phases.append({
+					"name": "build_up",
+					"start_time": intro_end,
+					"end_time": buildup_end,
+					"speed_multiplier": 2.0,
+					"growth_multiplier": 2.0,
+					"trail_multiplier": 2.0,
+					"trajectory_control": 0.5
+				})
+
+				# Phase 3: final_storm
+				new_phases.append({
+					"name": "final_storm",
+					"start_time": buildup_end,
+					"end_time": reveal_time,
+					"speed_multiplier": 3.5,
+					"growth_multiplier": 4.0,
+					"trail_multiplier": 3.0,
+					"trajectory_control": 1.0
+				})
 			
-			# Phase 4: climax_storm (6 giây cuối công bố đáp án và hé lộ ảnh)
+			# Phase 4: climax_storm (6 giây cuối công bố đáp án và hé lộ ảnh) - dùng chung tốc độ cực đại 12.0
 			new_phases.append({
 				"name": "climax_storm",
 				"start_time": reveal_time,
 				"end_time": duration,
-				"speed_multiplier": 10.0,
-				"growth_multiplier": climax_growth, # Phân tách theo mode chơi như cũ
-				"trail_multiplier": 3.5,
+				"speed_multiplier": 12.0,
+				"growth_multiplier": climax_growth,
+				"trail_multiplier": 4.0,
 				"trajectory_control": 1.0
 			})
 

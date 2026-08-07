@@ -69,7 +69,12 @@
       "properties": {
         "prompt": {"type": "string"},
         "reveal_time": {"type": "number"},
-        "enabled": {"type": "boolean"}
+        "enabled": {"type": "boolean"},
+        "options": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "correct_index": {"type": "integer", "minimum": 0}
       }
     }
   }
